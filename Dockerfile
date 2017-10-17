@@ -21,7 +21,6 @@ libexiv2-dev liblas-bin python-matplotlib libatlas-base-dev libgmp-dev libmpfr-d
 RUN apt-get remove libdc1394-22-dev
 RUN pip install --upgrade pip
 RUN pip install setuptools
-RUN pip install zip
 RUN pip install -U PyYAML exifread gpxpy xmltodict catkin-pkg appsettings https://github.com/OpenDroneMap/gippy/archive/v0.3.9.tar.gz
 
 ENV PYTHONPATH="$PYTHONPATH:/code/SuperBuild/install/lib/python2.7/dist-packages"
@@ -63,7 +62,7 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN rm -rf /code/SuperBuild/download 
 RUN rm -rf /code/SuperBuild/src/opencv/samples /code/SuperBuild/src/pcl/test /code/SuperBuild/src/pcl/doc /code/SuperBuild/src/pdal/test /code/SuperBuild/src/pdal/doc
-
+RUN pip install zip
 # Entry point
 ENTRYPOINT ["python", "/code/run.py", "code"]
 
