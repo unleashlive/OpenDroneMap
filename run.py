@@ -4,7 +4,7 @@ from opendm import log
 from opendm import config
 from opendm import system
 from opendm import io
-import zip
+import zip_results
 
 import ecto
 import os
@@ -46,7 +46,7 @@ if __name__ == '__main__':
 
     # execute the plasm
     plasm.execute(niter=1)
-    zip.zip_dirs([args.project_path + "/odm_georeferencing",
+    zip_results.zip_dirs([args.project_path + "/odm_georeferencing",
                     args.project_path + "/odm_meshing",
                     args.project_path + "/odm_orthophoto",
                     args.project_path + "/odm_texturing"])
