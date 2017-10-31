@@ -400,9 +400,9 @@ def parse_mtl(fname):
             # Tr 0.9 or d 0.9
             if (chunks[0] == "Tr" or chunks[0] == "d") and len(chunks) == 2:
                 if TRANSPARENCY == "invert":
-                    materials[identifier]["transparency"] = 1.0 - float(chunks[1])
+                    materials[identifier]["opacity"] = 1.0 - float(chunks[1])
                 else:
-                    materials[identifier]["transparency"] = float(chunks[1])
+                    materials[identifier]["opacity"] = float(chunks[1])
 
             # Optical density
             # Ni 1.0
@@ -1580,4 +1580,3 @@ if __name__ == "__main__":
         convert_ascii(infile, morphfiles, colorfiles, outfile)
     elif TYPE == "binary":
         convert_binary(infile, outfile)
-
