@@ -63,6 +63,7 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 RUN rm -rf /code/SuperBuild/download 
 RUN rm -rf /code/SuperBuild/src/opencv/samples /code/SuperBuild/src/pcl/test /code/SuperBuild/src/pcl/doc /code/SuperBuild/src/pdal/test /code/SuperBuild/src/pdal/doc
 COPY zip_results.py /code/zip_results.py
+COPY convert_obj_three.py /code/convert_obj_three.py
 
 # Entry point
 ENTRYPOINT ["python", "/code/run.py", "code"]

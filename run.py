@@ -46,6 +46,13 @@ if __name__ == '__main__':
 
     # execute the plasm
     plasm.execute(niter=1)
+
+    # CONVERT OBJ TO JS FOR THREEJS
+    inputFile = args.project_path + "/odm_texturing/odm_textured_model.obj"
+    outputFile = args.project_path + "/odm_texturing/odm_textured_model.js"
+    os.system('python convert_obj_three.py -i' + inputFile + ' -o ' + outputFile + ' -a center ')
+
+    # ZIP RESULTS
     zip_results.zip_dirs([args.project_path + "/odm_georeferencing",
                     args.project_path + "/odm_meshing",
                     args.project_path + "/odm_orthophoto",
