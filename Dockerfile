@@ -39,7 +39,6 @@ COPY configure.sh /code/configure.sh
 COPY /modules/ /code/modules/
 COPY /opendm/ /code/opendm/
 COPY /patched_files/ /code/patched_files/
-COPY run.py /code/run.py
 COPY run.sh /code/run.sh
 COPY /scripts/ /code/scripts/
 COPY /SuperBuild/cmake/ /code/SuperBuild/cmake/
@@ -56,15 +55,16 @@ RUN apt-get -y remove libgl1-mesa-dri git cmake python-pip build-essential
 RUN apt-get install -y libvtk5-dev
 
 # Cleanup APT
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* 
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Clean Superbuild
 
-RUN rm -rf /code/SuperBuild/download 
+RUN rm -rf /code/SuperBuild/download
 RUN rm -rf /code/SuperBuild/src/opencv/samples /code/SuperBuild/src/pcl/test /code/SuperBuild/src/pcl/doc /code/SuperBuild/src/pdal/test /code/SuperBuild/src/pdal/doc
 COPY zip_results.py /code/zip_results.py
 COPY convert_obj_three.py /code/convert_obj_three.py
-
+RUN apt-get install -y python-gdal
+COPY run.py /code/run.py
 # Entry point
 ENTRYPOINT ["python", "/code/run.py", "code"]
 

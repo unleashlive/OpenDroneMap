@@ -52,6 +52,11 @@ if __name__ == '__main__':
     outputFile = args.project_path + "/odm_texturing/odm_textured_model.js"
     os.system('python /code/convert_obj_three.py -i' + inputFile + ' -o ' + outputFile + ' -a center ')
 
+    # CREATE TMS TILES FOR ORTHOPHOTO
+    inputOrthoFile = args.project_path + "/odm_orthophoto/odm_orthophoto.tif"
+    outputOrthoTilesFolder = args.project_path + "/odm_orthophoto/tiles/"
+    os.system('gdal2tiles.py -z 10-22 ' + inputOrthoFile + ' ' + outputOrthoTilesFolder)
+
     # ZIP RESULTS
     zip_results.zip_dirs([args.project_path + "/odm_georeferencing",
                     args.project_path + "/odm_meshing",
