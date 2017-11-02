@@ -55,7 +55,7 @@ if __name__ == '__main__':
     # CREATE TMS TILES FOR ORTHOPHOTO
     inputOrthoFile = args.project_path + "/odm_orthophoto/odm_orthophoto.tif"
     outputOrthoTilesFolder = args.project_path + "/odm_orthophoto/tiles/"
-    os.system('gdal2tiles.py -z 10-22 ' + inputOrthoFile + ' ' + outputOrthoTilesFolder)
+    os.system('gdal2tiles.py -n ' + inputOrthoFile + ' ' + outputOrthoTilesFolder)
 
     # ZIP RESULTS
     zip_results.zip_dirs([args.project_path + "/odm_georeferencing",
