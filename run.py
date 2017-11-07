@@ -48,9 +48,9 @@ if __name__ == '__main__':
     plasm.execute(niter=1)
 
     # CONVERT OBJ TO JS FOR THREEJS
-    inputFile = args.project_path + "/odm_texturing/odm_textured_model.obj"
-    outputGLTFFile = args.project_path + "/odm_texturing/odm_textured_model.gltf"
-    os.system('node /code/node_modules/obj2gltf.js -s -i ' + inputFile + ' ' + outputGLTFFile)
+    inputFile = args.project_path + "/odm_texturing_25d/odm_textured_model.obj"
+    outputGLTFFile = args.project_path + "/odm_texturing_25d/odm_textured_model.gltf"
+    os.system('node /code/node_modules/obj2gltf/bin/obj2gltf.js -s -i ' + inputFile + ' ' + outputGLTFFile)
 
     #outputFile = args.project_path + "/odm_texturing/odm_textured_model.js"
     #os.system('python /code/convert_obj_three.py -i' + inputFile + ' -o ' + outputFile + ' -a center ')
