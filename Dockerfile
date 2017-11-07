@@ -69,7 +69,7 @@ RUN apt-get install -y python-gdal
 # node
 RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
 RUN apt-get install -y nodejs
-RUN npm install git+https://git@github.com/AnalyticalGraphicsInc/obj2gltf.git
+RUN npm -g install github:AnalyticalGraphicsInc/obj2gltf.git#90b0f31
 COPY run.py /code/run.py
 # Entry point
 ENTRYPOINT ["python", "/code/run.py", "code"]
