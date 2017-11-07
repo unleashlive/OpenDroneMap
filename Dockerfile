@@ -66,6 +66,10 @@ COPY convert_obj_three.py /code/convert_obj_three.py
 RUN add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
 RUN apt update 
 RUN apt-get install -y python-gdal
+# node
+RUN curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+RUN apt-get install -y nodejs
+RUN npm install --save obj2gltf
 COPY run.py /code/run.py
 # Entry point
 ENTRYPOINT ["python", "/code/run.py", "code"]

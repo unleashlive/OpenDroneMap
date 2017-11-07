@@ -49,8 +49,11 @@ if __name__ == '__main__':
 
     # CONVERT OBJ TO JS FOR THREEJS
     inputFile = args.project_path + "/odm_texturing/odm_textured_model.obj"
-    outputFile = args.project_path + "/odm_texturing/odm_textured_model.js"
-    os.system('python /code/convert_obj_three.py -i' + inputFile + ' -o ' + outputFile + ' -a center ')
+    outputGLTFFile = args.project_path + "/odm_texturing/odm_textured_model.gltf"
+    os.system('node /node_modules/obj2gltf.js -s -i ' + inputFile + ' ' + outputGLTFFile)
+
+    #outputFile = args.project_path + "/odm_texturing/odm_textured_model.js"
+    #os.system('python /code/convert_obj_three.py -i' + inputFile + ' -o ' + outputFile + ' -a center ')
 
     # CREATE TMS TILES FOR ORTHOPHOTO
     inputOrthoFile = args.project_path + "/odm_orthophoto/odm_orthophoto.tif"
