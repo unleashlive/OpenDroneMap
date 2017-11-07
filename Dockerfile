@@ -67,7 +67,7 @@ RUN add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
 RUN apt update 
 RUN apt-get install -y python-gdal
 # node
-RUN curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
 RUN apt-get install -y nodejs
 RUN npm install --save obj2gltf
 COPY run.py /code/run.py
