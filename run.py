@@ -56,10 +56,15 @@ if __name__ == '__main__':
     #os.system('python /code/convert_obj_three.py -i' + inputFile + ' -o ' + outputFile + ' -a center ')
 
     # RESIZE 3D MODEL TEXTURES
-    os.system('mkdir ' + args.project_path + '/odm_texturing/resized_8x')
-    os.system('mogrify -adaptive-resize 12.5% -path ' + args.project_path + '/odm_texturing/resized_8x/ -format png ' + args.project_path + '/odm_texturing/*.png')
-    os.system('mkdir ' + args.project_path + '/odm_texturing/resized_4x')
-    os.system('mogrify -adaptive-resize 25% -path ' + args.project_path + '/odm_texturing/resized_4x/ -format png ' + args.project_path + '/odm_texturing/*.png')
+    odm_texturing_folder = args.project_path + "/odm_texturing"
+    resized_8x_folder = odm_texturing_folder + "/resized_8x"
+    resized_4x_folder = odm_texturing_folder + "/resized_4x"
+    resize_8x_command = 'mogrify -adaptive-resize 12.5% -path ' + resized_8x_folder + ' -format png ' + odm_texturing_folder + '/*.png'
+    resize_4x_command = 'mogrify -adaptive-resize 25% -path ' + resized_4x_folder + ' -format png ' + odm_texturing_folder + '/*.png'
+    os.system('mkdir ' + resized_8x_folder)
+    os.system(resize_8x_command)
+    os.system('mkdir ' + resized_4x_folder)
+    os.system(resize_4x_command)
 
 
     # CREATE TMS TILES FOR ORTHOPHOTO
