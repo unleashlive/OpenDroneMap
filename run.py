@@ -65,6 +65,9 @@ if __name__ == '__main__':
     os.system(resize_8x_command)
     os.system('mkdir ' + resized_4x_folder)
     os.system(resize_4x_command)
+    os.system('cp ' + outputGLTFFile + ' ' + resized_8x_folder)
+    os.system('cp ' + outputGLTFFile + ' ' + resized_4x_folder)
+
 
 
     # CREATE TMS TILES FOR ORTHOPHOTO
