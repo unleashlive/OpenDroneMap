@@ -55,12 +55,13 @@ if __name__ == '__main__':
     #outputFile = args.project_path + "/odm_texturing/odm_textured_model.js"
     #os.system('python /code/convert_obj_three.py -i' + inputFile + ' -o ' + outputFile + ' -a center ')
 
-    # RESIZE 3D MODEL TEXTURES
+    # RESIZE 3D MODEL TEXTURES - UNG-134
     odm_texturing_folder = args.project_path + "/odm_texturing"
-    resized_8x_folder = odm_texturing_folder + "/resized_8x"
-    resized_4x_folder = odm_texturing_folder + "/resized_4x"
-    resize_8x_command = 'mogrify -adaptive-resize 12.5% -path ' + resized_8x_folder + ' -format png ' + odm_texturing_folder + '/*.png'
-    resize_4x_command = 'mogrify -adaptive-resize 25% -path ' + resized_4x_folder + ' -format png ' + odm_texturing_folder + '/*.png'
+    resized_8x_folder = "./resized_8x"
+    resized_4x_folder = "./resized_4x"
+    # due to imagemagick bug, its impossible to have colon : in the -path param content, so use 'cd' to get relative path
+    resize_8x_command = 'cd odm_texturing_folder && mogrify -adaptive-resize 12.5% -path ' + resized_8x_folder + ' -format png ' + './*.png'
+    resize_4x_command = 'cd odm_texturing_folder && mogrify -adaptive-resize 25% -path ' + resized_4x_folder + ' -format png ' + './*.png'
     os.system('mkdir ' + resized_8x_folder)
     os.system(resize_8x_command)
     os.system('mkdir ' + resized_4x_folder)
