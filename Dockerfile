@@ -12,6 +12,9 @@ RUN add-apt-repository -y ppa:ubuntugis/ppa
 RUN add-apt-repository -y ppa:george-edison55/cmake-3.x
 RUN apt-get update -y
 
+#prepare node installation
+RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
+
 # All packages (Will install much faster)
 RUN apt-get install --no-install-recommends -y git cmake python-pip build-essential software-properties-common python-software-properties libgdal-dev gdal-bin libgeotiff-dev \
 libgtk2.0-dev libavcodec-dev libavformat-dev libswscale-dev python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libflann-dev \
@@ -24,8 +27,6 @@ RUN pip install --upgrade pip
 RUN pip install setuptools
 RUN pip install -U PyYAML exifread gpxpy xmltodict catkin-pkg appsettings https://github.com/OpenDroneMap/gippy/archive/v0.3.9.tar.gz
 
-#install node
-RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
 #install obj2gltf
 RUN npm -g install github:AnalyticalGraphicsInc/obj2gltf.git#90b0f31
 
