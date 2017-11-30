@@ -7,6 +7,7 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update -y
 RUN apt-get install software-properties-common -y
 #Required Requisites
+RUN add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
 RUN add-apt-repository -y ppa:ubuntugis/ppa
 RUN add-apt-repository -y ppa:george-edison55/cmake-3.x
 RUN apt-get update -y
@@ -16,12 +17,17 @@ RUN apt-get install --no-install-recommends -y git cmake python-pip build-essent
 libgtk2.0-dev libavcodec-dev libavformat-dev libswscale-dev python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libflann-dev \
 libproj-dev libxext-dev liblapack-dev libeigen3-dev libvtk5-dev python-networkx libgoogle-glog-dev libsuitesparse-dev libboost-filesystem-dev libboost-iostreams-dev \
 libboost-regex-dev libboost-python-dev libboost-date-time-dev libboost-thread-dev python-pyproj python-empy python-nose python-pyside python-pyexiv2 python-scipy \
-libexiv2-dev liblas-bin python-matplotlib libatlas-base-dev libgmp-dev libmpfr-dev swig2.0 python-wheel libboost-log-dev libjsoncpp-dev
+libexiv2-dev liblas-bin python-matplotlib libatlas-base-dev libgmp-dev libmpfr-dev swig2.0 python-wheel libboost-log-dev libjsoncpp-dev nodejs imagemagick python-gdal
 
 RUN apt-get remove libdc1394-22-dev
 RUN pip install --upgrade pip
 RUN pip install setuptools
 RUN pip install -U PyYAML exifread gpxpy xmltodict catkin-pkg appsettings https://github.com/OpenDroneMap/gippy/archive/v0.3.9.tar.gz
+
+#install node
+RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
+#install obj2gltf
+RUN npm -g install github:AnalyticalGraphicsInc/obj2gltf.git#90b0f31
 
 ENV PYTHONPATH="$PYTHONPATH:/code/SuperBuild/install/lib/python2.7/dist-packages"
 ENV PYTHONPATH="$PYTHONPATH:/code/SuperBuild/src/opensfm"
@@ -51,25 +57,20 @@ COPY VERSION /code/VERSION
 
 RUN cd SuperBuild && mkdir build && cd build && cmake  .. && make -j$(nproc)     && cd ../.. && mkdir build && cd build && cmake .. && make -j$(nproc)
 
-RUN apt-get -y remove libgl1-mesa-dri git cmake python-pip build-essential
+RUN apt-get -y remove libgl1-mesa-dri cmake python-pip build-essential
 RUN apt-get install -y libvtk5-dev
 
 # Cleanup APT
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Clean Superbuild
-
 RUN rm -rf /code/SuperBuild/download
 RUN rm -rf /code/SuperBuild/src/opencv/samples /code/SuperBuild/src/pcl/test /code/SuperBuild/src/pcl/doc /code/SuperBuild/src/pdal/test /code/SuperBuild/src/pdal/doc
+
+#copy code files
 COPY zip_results.py /code/zip_results.py
 COPY convert_obj_three.py /code/convert_obj_three.py
-RUN add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
-RUN apt update 
-RUN apt-get install -y python-gdal
-# node
-RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
-RUN apt-get install -y nodejs git imagemagick
-RUN npm -g install github:AnalyticalGraphicsInc/obj2gltf.git#90b0f31
 COPY run.py /code/run.py
+
 # Entry point
 ENTRYPOINT ["python", "/code/run.py", "code"]
