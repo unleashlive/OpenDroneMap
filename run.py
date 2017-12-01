@@ -60,8 +60,8 @@ if __name__ == '__main__':
     resized_8x_folder = "./resized_8x"
     resized_4x_folder = "./resized_4x"
     # due to imagemagick bug, its impossible to have colon : in the -path param content, so use 'cd' to get relative path
-    resize_8x_command = 'cd ' + odm_texturing_folder + ' && mogrify -adaptive-resize 12.5% -path ' + resized_8x_folder + ' -format png ' + './*.png'
-    resize_4x_command = 'cd ' + odm_texturing_folder + ' && mogrify -adaptive-resize 25% -path ' + resized_4x_folder + ' -format png ' + './*.png'
+    resize_8x_command = 'mkdir ' + resized_8x_folder + ' && cd ' + odm_texturing_folder + ' && mogrify -adaptive-resize 12.5% -path ' + resized_8x_folder + ' -format png ' + './*.png'
+    resize_4x_command = 'mkdir ' + resized_4x_folder + ' && cd ' + odm_texturing_folder + ' && mogrify -adaptive-resize 25% -path ' + resized_4x_folder + ' -format png ' + './*.png'
     os.system('mkdir ' + resized_8x_folder)
     os.system(resize_8x_command)
     os.system('mkdir ' + resized_4x_folder)
