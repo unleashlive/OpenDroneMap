@@ -72,6 +72,7 @@ RUN rm -rf /code/SuperBuild/src/opencv/samples /code/SuperBuild/src/pcl/test /co
 COPY zip_results.py /code/zip_results.py
 COPY convert_obj_three.py /code/convert_obj_three.py
 COPY run.py /code/run.py
+COPY ua_postprocessing.py /code/ua_postprocessing.py
 
 # Entry point
 ENTRYPOINT ["python", "/code/run.py", "code"]
