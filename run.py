@@ -51,17 +51,13 @@ if __name__ == '__main__':
     # UA POSTPROCESSING CUSTOM CODE
 
     # CONVERT OBJ TO JS FOR THREEJS
-    inputFile = args.project_path + "/odm_texturing/odm_textured_model.obj"
-    outputGLTFFile = args.project_path + "/odm_texturing/odm_textured_model.gltf"
-    ua_postprocessing.obj2gltf(inputFile, outputGLTFFile)
+    ua_postprocessing.obj2gltf(args.project_path)
 
     # RESIZE 3D MODEL TEXTURES - UNG-134
-    ua_postprocessing.resize_textures(args.project_path, outputGLTFFile)
+    ua_postprocessing.resize_textures(args.project_path)
 
     # CREATE TMS TILES FOR ORTHOPHOTO
-    inputOrthoFile = args.project_path + "/odm_orthophoto/odm_orthophoto.tif"
-    outputOrthoTilesFolder = args.project_path + "/odm_orthophoto/tiles/"
-    ua_postprocessing.tif2tiles(inputOrthoFile, outputOrthoTilesFolder)
+    ua_postprocessing.tif2tiles(args.project_path)
 
     # ZIP RESULTS
     zip_results.zip_dirs([args.project_path + "/odm_georeferencing",
