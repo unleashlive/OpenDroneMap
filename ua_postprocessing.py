@@ -8,8 +8,8 @@ def resize_textures(project_path, outputGLTFFile):
     resize_4x_command = 'cd ' + odm_texturing_folder + ' && mkdir ' + resized_4x_folder + ' && mogrify -adaptive-resize 25% -path ' + resized_4x_folder + ' -format png ' + './*.png'
     os.system(resize_8x_command)
     os.system(resize_4x_command)
-    os.system('cp ' + outputGLTFFile + ' ' + resized_8x_folder)
-    os.system('cp ' + outputGLTFFile + ' ' + resized_4x_folder)
+    os.system('cd ' + odm_texturing_folder + ' && cp ' + outputGLTFFile + ' ' + resized_8x_folder)
+    os.system('cd ' + odm_texturing_folder + ' && cp ' + outputGLTFFile + ' ' + resized_4x_folder)
 
 def obj2gltf(inputFile, outputGLTFFile):
     os.system('obj2gltf -s --checkTransparency -i ' + inputFile + ' -o ' + outputGLTFFile)
