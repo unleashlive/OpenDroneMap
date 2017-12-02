@@ -8,7 +8,7 @@ import zip_results
 
 import ecto
 import os
-
+import ua_postprocessing
 from scripts.odm_app import ODMApp
 
 if __name__ == '__main__':
@@ -47,34 +47,21 @@ if __name__ == '__main__':
     # execute the plasm
     plasm.execute(niter=1)
 
+
+    # UA POSTPROCESSING CUSTOM CODE
+
     # CONVERT OBJ TO JS FOR THREEJS
     inputFile = args.project_path + "/odm_texturing/odm_textured_model.obj"
     outputGLTFFile = args.project_path + "/odm_texturing/odm_textured_model.gltf"
-    os.system('obj2gltf -s --checkTransparency -i ' + inputFile + ' -o ' + outputGLTFFile)
-
-    #outputFile = args.project_path + "/odm_texturing/odm_textured_model.js"
-    #os.system('python /code/convert_obj_three.py -i' + inputFile + ' -o ' + outputFile + ' -a center ')
+    ua_postprocessing.obj2gltf(inputFile, outputGLTFFile)
 
     # RESIZE 3D MODEL TEXTURES - UNG-134
-    odm_texturing_folder = args.project_path + "/odm_texturing"
-    resized_8x_folder = "./resized_8x"
-    resized_4x_folder = "./resized_4x"
-    # due to imagemagick bug, its impossible to have colon : in the -path param content, so use 'cd' to get relative path
-    resize_8x_command = 'mkdir ' + resized_8x_folder + ' && cd ' + odm_texturing_folder + ' && mogrify -adaptive-resize 12.5% -path ' + resized_8x_folder + ' -format png ' + './*.png'
-    resize_4x_command = 'mkdir ' + resized_4x_folder + ' && cd ' + odm_texturing_folder + ' && mogrify -adaptive-resize 25% -path ' + resized_4x_folder + ' -format png ' + './*.png'
-    os.system('mkdir ' + resized_8x_folder)
-    os.system(resize_8x_command)
-    os.system('mkdir ' + resized_4x_folder)
-    os.system(resize_4x_command)
-    os.system('cp ' + outputGLTFFile + ' ' + resized_8x_folder)
-    os.system('cp ' + outputGLTFFile + ' ' + resized_4x_folder)
-
-
+    ua_postprocessing.resize_textures(args.project_path, outputGLTFFile)
 
     # CREATE TMS TILES FOR ORTHOPHOTO
     inputOrthoFile = args.project_path + "/odm_orthophoto/odm_orthophoto.tif"
     outputOrthoTilesFolder = args.project_path + "/odm_orthophoto/tiles/"
-    os.system('gdal2tiles.py -n ' + inputOrthoFile + ' ' + outputOrthoTilesFolder)
+    ua_postprocessing.tif2tiles(inputOrthoFile, outputOrthoTilesFolder)
 
     # ZIP RESULTS
     zip_results.zip_dirs([args.project_path + "/odm_georeferencing",
