@@ -25,7 +25,7 @@ libexiv2-dev liblas-bin python-matplotlib libatlas-base-dev libgmp-dev libmpfr-d
 RUN apt-get remove libdc1394-22-dev
 RUN pip install --upgrade pip
 RUN pip install setuptools
-RUN pip install -U PyYAML exifread gpxpy xmltodict catkin-pkg appsettings https://github.com/OpenDroneMap/gippy/archive/v0.3.9.tar.gz
+RUN pip install -U PyYAML exifread gpxpy xmltodict catkin-pkg appsettings https://github.com/OpenDroneMap/gippy/archive/v0.3.9.tar.gz loky
 
 #install obj2gltf
 RUN npm -g install github:AnalyticalGraphicsInc/obj2gltf.git#90b0f31
