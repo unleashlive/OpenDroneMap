@@ -28,7 +28,7 @@ RUN pip install setuptools
 RUN pip install -U PyYAML exifread gpxpy xmltodict catkin-pkg appsettings https://github.com/OpenDroneMap/gippy/archive/v0.3.9.tar.gz loky scipy shapely numpy pyproj psutil
 
 #install obj2gltf
-RUN npm -g install github:AnalyticalGraphicsInc/obj2gltf.git#90b0f31
+RUN npm -g install github:AnalyticalGraphicsInc/obj2gltf.git
 
 ENV PYTHONPATH="$PYTHONPATH:/code/SuperBuild/install/lib/python2.7/dist-packages"
 ENV PYTHONPATH="$PYTHONPATH:/code/SuperBuild/src/opensfm"
