@@ -12,8 +12,8 @@ def resize_textures(project_path):
     os.system(resize_2x_command)
     os.system(resize_4x_command)
     # create symlinks that are needed to generate glb files
-    os.system('ln -s ' + odm_texturing_folder + inputObjFile + ' ' + odm_texturing_folder + resized_2x_folder)
-    os.system('ln -s ' + odm_texturing_folder + inputMtlFile + ' ' + odm_texturing_folder + resized_4x_folder)
+    os.system('cp ' + odm_texturing_folder + inputObjFile + ' ' + odm_texturing_folder + resized_2x_folder)
+    os.system('cp ' + odm_texturing_folder + inputMtlFile + ' ' + odm_texturing_folder + resized_4x_folder)
 
 def obj2gltf(project_path):
     inputFile = project_path + "/odm_texturing/odm_textured_model.obj"
