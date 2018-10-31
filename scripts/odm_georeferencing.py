@@ -1,6 +1,7 @@
 import ecto
 import csv
 import os
+import struct
 
 from opendm import io
 from opendm import log
@@ -38,6 +39,7 @@ class ODMGeoreferencingCell(ecto.Cell):
         reconstruction = inputs.reconstruction
         gcpfile = tree.odm_georeferencing_gcp
         doPointCloudGeo = True
+        transformPointCloud = True
         verbose = '-verbose' if self.params.verbose else ''
 
         # check if we rerun cell or not
@@ -53,10 +55,10 @@ class ODMGeoreferencingCell(ecto.Cell):
             'model': os.path.join(tree.odm_texturing, tree.odm_textured_model_obj)
         }]
 
-        if args.fast_orthophoto:
+        if args.skip_3dmodel:
             runs = []
 
-        if args.use_25dmesh:
+        if not args.use_3dmesh:
             runs += [{
                     'georeferencing_dir': tree.odm_25dgeoreferencing,
                     'texturing_dir': tree.odm_25dtexturing,
@@ -68,6 +70,7 @@ class ODMGeoreferencingCell(ecto.Cell):
             odm_georeferencing_model_ply_geo = os.path.join(r['georeferencing_dir'], tree.odm_georeferencing_model_ply_geo)
             odm_georeferencing_log = os.path.join(r['georeferencing_dir'], tree.odm_georeferencing_log)
             odm_georeferencing_transform_file = os.path.join(r['georeferencing_dir'], tree.odm_georeferencing_transform_file)
+            odm_georeferencing_model_txt_geo_file = os.path.join(r['georeferencing_dir'], tree.odm_georeferencing_model_txt_geo)
 
             if not io.file_exists(odm_georeferencing_model_obj_geo) or \
                not io.file_exists(odm_georeferencing_model_ply_geo) or rerun_cell:
@@ -84,44 +87,49 @@ class ODMGeoreferencingCell(ecto.Cell):
                     'transform_file': odm_georeferencing_transform_file,
                     'coords': tree.odm_georeferencing_coords,
                     'pc_geo': odm_georeferencing_model_ply_geo,
-                    'geo_sys': os.path.join(r['georeferencing_dir'], tree.odm_georeferencing_model_txt_geo),
+                    'geo_sys': odm_georeferencing_model_txt_geo_file,
                     'model_geo': odm_georeferencing_model_obj_geo,
                     'gcp': gcpfile,
                     'verbose': verbose
 
                 }
-                if not args.use_pmvs:
-                    if args.fast_orthophoto:
-                        kwargs['pc'] = os.path.join(tree.opensfm, 'reconstruction.ply')
-                    else:
-                        kwargs['pc'] = tree.opensfm_model
-                else:
-                    kwargs['pc'] = tree.pmvs_model
 
+                if args.fast_orthophoto:
+                    kwargs['pc'] = os.path.join(tree.opensfm, 'reconstruction.ply')
+                elif args.use_opensfm_dense:
+                    kwargs['pc'] = tree.opensfm_model
+                else:
+                    kwargs['pc'] = tree.smvs_model
+
+                if transformPointCloud:
+                    kwargs['pc_params'] = '-inputPointCloudFile {pc} -outputPointCloudFile {pc_geo}'.format(**kwargs)
+                else:
+                    kwargs['pc_params'] = ''
+                    
                 # Check to see if the GCP file exists
 
-                #if not self.params.use_exif and (self.params.gcp_file or tree.odm_georeferencing_gcp):
-                #    log.ODM_INFO('Found %s' % gcpfile)
-                #    try:
-                #        system.run('{bin}/odm_georef -bundleFile {bundle} -imagesPath {imgs} -imagesListPath {imgs_list} '
-                #                   '-inputFile {model} -outputFile {model_geo} '
-                #                   '-inputPointCloudFile {pc} -outputPointCloudFile {pc_geo} {verbose} '
-                #                   '-logFile {log} -outputTransformFile {transform_file} -georefFileOutputPath {geo_sys} -gcpFile {gcp} '
-                #                   '-outputCoordFile {coords}'.format(**kwargs))
-                #    except Exception:
-                #        log.ODM_EXCEPTION('Georeferencing failed. ')
-                #        return ecto.QUIT
-                if io.file_exists(tree.opensfm_transformation):
+                if not self.params.use_exif and (self.params.gcp_file or tree.odm_georeferencing_gcp):
+                   log.ODM_INFO('Found %s' % gcpfile)
+                   try:
+                       system.run('{bin}/odm_georef -bundleFile {bundle} -imagesPath {imgs} -imagesListPath {imgs_list} '
+                                  '-inputFile {model} -outputFile {model_geo} '
+                                  '{pc_params} {verbose} '
+                                  '-logFile {log} -outputTransformFile {transform_file} -georefFileOutputPath {geo_sys} -gcpFile {gcp} '
+                                  '-outputCoordFile {coords}'.format(**kwargs))
+                   except Exception:
+                       log.ODM_EXCEPTION('Georeferencing failed. ')
+                       return ecto.QUIT
+                elif io.file_exists(tree.opensfm_transformation) and io.file_exists(tree.odm_georeferencing_coords):
                     log.ODM_INFO('Running georeferencing with OpenSfM transformation matrix')
-                    system.run('{bin}/odm_georef -bundleFile {bundle} -inputTransformFile {input_trans_file} '
+                    system.run('{bin}/odm_georef -bundleFile {bundle} -inputTransformFile {input_trans_file} -inputCoordFile {coords} '
                                '-inputFile {model} -outputFile {model_geo} '
-                               '-inputPointCloudFile {pc} -outputPointCloudFile {pc_geo} {verbose} '
+                               '{pc_params} {verbose} '
                                '-logFile {log} -outputTransformFile {transform_file} -georefFileOutputPath {geo_sys}'.format(**kwargs))
                 elif io.file_exists(tree.odm_georeferencing_coords):
                     log.ODM_INFO('Running georeferencing with generated coords file.')
                     system.run('{bin}/odm_georef -bundleFile {bundle} -inputCoordFile {coords} '
                                '-inputFile {model} -outputFile {model_geo} '
-                               '-inputPointCloudFile {pc} -outputPointCloudFile {pc_geo} {verbose} '
+                               '{pc_params} {verbose} '
                                '-logFile {log} -outputTransformFile {transform_file} -georefFileOutputPath {geo_sys}'.format(**kwargs))
                 else:
                     log.ODM_WARNING('Georeferencing failed. Make sure your '
@@ -129,50 +137,58 @@ class ODMGeoreferencingCell(ecto.Cell):
                                     'provided a GCP file. ')
                     doPointCloudGeo = False # skip the rest of the georeferencing
 
-                odm_georeferencing_model_ply_geo = os.path.join(tree.odm_georeferencing,
-                                                                tree.odm_georeferencing_model_ply_geo)
                 if doPointCloudGeo:
                     # update images metadata
                     geo_ref = reconstruction.georef
-                    geo_ref.parse_transformation_matrix(tree.opensfm_transformation)
+                    geo_ref.extract_offsets(odm_georeferencing_model_txt_geo_file)
 
                     # convert ply model to LAS reference system
                     geo_ref.convert_to_las(odm_georeferencing_model_ply_geo,
-                                           tree.odm_georeferencing_model_las,
+                                           tree.odm_georeferencing_model_laz,
                                            tree.odm_georeferencing_las_json)
 
                     reconstruction.georef = geo_ref
 
                     # XYZ point cloud output
-                    log.ODM_INFO("Creating geo-referenced CSV file (XYZ format)")
-                    with open(tree.odm_georeferencing_xyz_file, "wb") as csvfile:
-                        csvfile_writer = csv.writer(csvfile, delimiter=",")
-                        reachedpoints = False
-                        with open(odm_georeferencing_model_ply_geo) as f:
-                            for lineNumber, line in enumerate(f):
-                                if reachedpoints:
-                                    tokens = line.split(" ")
+                    if args.pc_csv:
+                        log.ODM_INFO("Creating geo-referenced CSV file (XYZ format)")
+                        with open(tree.odm_georeferencing_xyz_file, "wb") as csvfile:
+                            csvfile_writer = csv.writer(csvfile, delimiter=",")
+                            with open(odm_georeferencing_model_ply_geo) as f:
+                                endianess = '<' # little endian
+                                while True:
+                                    line = f.readline()
+                                    if "binary_big_endian" in line:
+                                        endianess = '>'
+                                    if line.startswith("end_header"):
+                                        break
+
+                                fmt = '{}dddBBB'.format(endianess)
+                                while True:
+                                    chunk = f.read(27) # 3 doubles, 3 uints
+                                    if len(chunk) < 27:
+                                        break
+                                    tokens = struct.unpack(fmt, chunk)
                                     csv_line = [float(tokens[0]),
                                                 float(tokens[1]),
                                                 tokens[2]]
                                     csvfile_writer.writerow(csv_line)
-                                if line.startswith("end_header"):
-                                    reachedpoints = True
-                    csvfile.close()
 
                     if args.crop > 0:
                         log.ODM_INFO("Calculating cropping area and generating bounds shapefile from point cloud")
                         cropper = Cropper(tree.odm_georeferencing, 'odm_georeferenced_model')
-                        cropper.create_bounds_shapefile(tree.odm_georeferencing_model_las, args.crop)
+                        cropper.create_bounds_shapefile(tree.odm_georeferencing_model_laz, args.crop, 
+                                                    decimation_step=40 if args.fast_orthophoto or args.use_opensfm_dense else 90,
+                                                    outlier_radius=20 if args.fast_orthophoto else 2)
 
                     # Do not execute a second time, since
                     # We might be doing georeferencing for
                     # multiple models (3D, 2.5D, ...)
                     doPointCloudGeo = False
-
-        else:
-            log.ODM_WARNING('Found a valid georeferenced model in: %s'
-                            % odm_georeferencing_model_ply_geo)
+                    transformPointCloud = False
+            else:
+                log.ODM_WARNING('Found a valid georeferenced model in: %s'
+                                % odm_georeferencing_model_ply_geo)
 
         outputs.reconstruction = reconstruction
 

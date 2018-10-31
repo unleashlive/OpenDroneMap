@@ -59,7 +59,7 @@ class ODMLoadDatasetCell(ecto.Cell):
 
         # define paths and create working directories
         system.mkdir_p(tree.odm_georeferencing)
-        if args.use_25dmesh: system.mkdir_p(tree.odm_25dgeoreferencing)
+        if not args.use_3dmesh: system.mkdir_p(tree.odm_25dgeoreferencing)
 
         log.ODM_DEBUG('Loading dataset from: %s' % images_dir)
 
@@ -98,22 +98,23 @@ class ODMLoadDatasetCell(ecto.Cell):
                 }
 
                 # run UTM extraction binary
-                extract_utm = system.run_and_return('{bin}/odm_extract_utm -imagesPath {imgs}/ '
-                                                    '-imageListFile {imgs_list} -outputCoordFile {coords} {verbose} '
-                                                    '-logFile {log}'.format(**kwargs))
-
-                if extract_utm != '':
+                try:
+                    system.run('{bin}/odm_extract_utm -imagesPath {imgs}/ '
+                                                        '-imageListFile {imgs_list} -outputCoordFile {coords} {verbose} '
+                                                        '-logFile {log}'.format(**kwargs))
+                except:
                     log.ODM_WARNING('Could not generate coordinates file. '
-                                    'Ignore if there is a GCP file. Error: %s'
-                                    % extract_utm)
+                                    'Ignore if there is a GCP file')
 
                 outputs.reconstruction = types.ODM_Reconstruction(photos, coords_file=tree.odm_georeferencing_coords)
         else:
             outputs.reconstruction = types.ODM_Reconstruction(photos, projstring=self.params.proj)
 
-        # Save proj to file for future use
-        with open(io.join_paths(tree.odm_georeferencing, tree.odm_georeferencing_proj), 'w') as f:
-            f.write(outputs.reconstruction.projection.srs)
+        # Save proj to file for future use (unless this 
+        # dataset is not georeferenced)
+        if outputs.reconstruction.projection:
+            with open(io.join_paths(tree.odm_georeferencing, tree.odm_georeferencing_proj), 'w') as f:
+                f.write(outputs.reconstruction.projection.srs)
 
         log.ODM_INFO('Running ODM Load Dataset Cell - Finished')
         return ecto.OK if args.end_with != 'dataset' else ecto.QUIT

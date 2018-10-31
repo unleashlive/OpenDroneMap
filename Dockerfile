@@ -25,7 +25,7 @@ libexiv2-dev liblas-bin python-matplotlib libatlas-base-dev libgmp-dev libmpfr-d
 RUN apt-get remove libdc1394-22-dev
 RUN pip install --upgrade pip
 RUN pip install setuptools
-RUN pip install -U PyYAML exifread gpxpy xmltodict catkin-pkg appsettings https://github.com/OpenDroneMap/gippy/archive/v0.3.9.tar.gz loky scipy shapely numpy pyproj psutil
+RUN pip install -U PyYAML exifread gpxpy xmltodict catkin-pkg appsettings https://github.com/gipit/gippy/archive/1.0.0.zip loky shapely numpy pyproj psutil repoze.lru && pip install -U scipy --ignore-installed
 
 #install obj2gltf
 RUN npm -g install github:AnalyticalGraphicsInc/obj2gltf.git
@@ -46,6 +46,7 @@ COPY configure.sh /code/configure.sh
 COPY /modules/ /code/modules/
 COPY /opendm/ /code/opendm/
 COPY /patched_files/ /code/patched_files/
+COPY run.py /code/run.py
 COPY run.sh /code/run.sh
 COPY /scripts/ /code/scripts/
 COPY /SuperBuild/cmake/ /code/SuperBuild/cmake/
@@ -65,12 +66,12 @@ RUN apt-get install -y libvtk6-dev
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Clean Superbuild
-RUN rm -rf /code/SuperBuild/download /code/SuperBuild/src/vtk7 /code/SuperBuild/src/opencv /code/SuperBuild/src/pcl /code/SuperBuild/src/pdal /code/SuperBuild/src/opengv /code/SuperBuild/src/mvstexturing /code/SuperBuild/src/ceres /code/SuperBuild/build/vtk7 /code/SuperBuild/build/opencv
+
+RUN rm -rf /code/SuperBuild/download /code/SuperBuild/src/opencv /code/SuperBuild/src/pcl /code/SuperBuild/src/pdal /code/SuperBuild/src/opengv /code/SuperBuild/src/mvstexturing /code/SuperBuild/src/ceres /code/SuperBuild/build/opencv  /code/SuperBuild/src/exiv2lib
 
 #copy code files
 COPY zip_results.py /code/zip_results.py
 COPY convert_obj_three.py /code/convert_obj_three.py
-COPY run.py /code/run.py
 COPY ua_postprocessing.py /code/ua_postprocessing.py
 
 # Entry point

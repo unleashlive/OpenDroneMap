@@ -8,11 +8,9 @@
 // PCL
 #include <pcl/common/eigen.h>
 #include <pcl/common/common.h>
+#include <pcl/io/ply_io.h>
 // Modified PCL
 #include "modifiedPclFunctions.hpp"
-
-#include "tinyply.h"
-using namespace tinyply;
 
 // Logger
 #include "Logger.hpp"
@@ -49,10 +47,11 @@ struct GeorefGCP
 
     size_t cameraIndex_;    /**< The index to the corresponding camera for the image. **/
 
-    int pixelX_;            /**< The pixels x-position for the GCP in the corresponding image **/
-    int pixelY_;            /**< The pixels y-position for the GCP in the corresponding image **/
+    double pixelX_;            /**< The pixels x-position for the GCP in the corresponding image **/
+    double pixelY_;            /**< The pixels y-position for the GCP in the corresponding image **/
 
     std::string image_;     /**< The corresponding image for the GCP **/
+    std::string idgcp_;     /**< The corresponding identification for the GCP **/
 
     GeorefGCP();
     ~GeorefGCP();
@@ -238,7 +237,9 @@ private:
     /*!
       * \brief printFinalTransform      Prints a file containing the final transform, next to the output file.
       **/
-    void printFinalTransform(Mat4 transform);
+    template <typename Scalar>
+    void printFinalTransform(const Eigen::Transform<Scalar, 3, Eigen::Affine> &transform);
+
     
     /*!
       * \brief Loads a model from an .obj file (replacement for the pcl obj loader).
@@ -292,7 +293,7 @@ private:
     bool            multiMaterial_;     /**< True if the mesh has multiple materials. **/
 
     std::vector<pcl::MTLReader> companions_; /**< Materials (used by loadOBJFile). **/
-    void performFinalTransform(Mat4 &transMat, pcl::TextureMesh &mesh, pcl::PointCloud<pcl::PointXYZ>::Ptr &meshCloud);
+    void performFinalTransform(Mat4 &transMat, pcl::TextureMesh &mesh, pcl::PointCloud<pcl::PointXYZ>::Ptr &meshCloud, bool addUTM);
     
     template <typename Scalar>
     void transformPointCloud(const char *inputFile, const Eigen::Transform<Scalar, 3, Eigen::Affine> &transform, const char *outputFile);

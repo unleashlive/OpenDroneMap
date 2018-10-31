@@ -8,8 +8,7 @@ ExternalProject_Add(${_proj_name}
   STAMP_DIR         ${_SB_BINARY_DIR}/stamp
   #--Download step--------------
   DOWNLOAD_DIR      ${SB_DOWNLOAD_DIR}
-  URL               https://github.com/mapillary/OpenSfM/archive/e3f56375f834822f1e03d37bd9b48777acc092ed.zip
-  URL_MD5           0560754729245891ee8279f7c788b044
+  URL               https://github.com/OpenDroneMap/OpenSfM/archive/9b4b17f238a3762c4267cdaeb5f64173c0f704a6.zip
   #--Update/Patch step----------
   UPDATE_COMMAND    ""
   #--Configure step-------------

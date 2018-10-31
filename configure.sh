@@ -1,16 +1,15 @@
 #!/bin/bash
 
+if [[ $2 =~ ^[0-9]+$ ]] ; then
+    processes=$2
+else
+    processes=$(nproc)
+fi
+
 install() {
     ## Set up library paths
-
     export PYTHONPATH=$RUNPATH/SuperBuild/install/lib/python2.7/dist-packages:$RUNPATH/SuperBuild/src/opensfm:$PYTHONPATH
     export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$RUNPATH/SuperBuild/install/lib
-
-    if [[ $2 =~ ^[0-9]+$ ]] ; then
-        processes=$2
-    else
-        processes=$(nproc)
-    fi
 
     ## Before installing
     echo "Updating the system"
@@ -78,7 +77,8 @@ install() {
                         gpxpy \
                         xmltodict \
                         appsettings \
-                        loky
+                        loky \
+                        repoze.lru
 
     echo "Installing Ecto Dependencies"
     pip install -U catkin-pkg
@@ -87,9 +87,7 @@ install() {
                          python-pyside
 
     echo "Installing OpenDroneMap Dependencies"
-    apt-get install -y -qq python-pyexiv2 \
-                         python-scipy \
-                         libexiv2-dev \
+    apt-get install -y -qq python-scipy \
                          liblas-bin
 
     echo "Installing lidar2dems Dependencies"
@@ -100,7 +98,8 @@ install() {
     echo "Installing split-merge Dependencies"
     pip install -U scipy shapely numpy pyproj
 
-    pip install -U https://github.com/OpenDroneMap/gippy/archive/v0.3.9.tar.gz psutil
+    pip install -U https://github.com/gipit/gippy/archive/1.0.0.zip psutil
+
 
     echo "Compiling SuperBuild"
     cd ${RUNPATH}/SuperBuild
