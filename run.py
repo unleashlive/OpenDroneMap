@@ -69,6 +69,7 @@ if __name__ == '__main__':
     zip_results.zip_dirs([args.project_path + "/odm_georeferencing",
                     args.project_path + "/odm_meshing",
                     args.project_path + "/odm_orthophoto",
+                    args.project_path + "/odm_dem",
                     args.project_path + "/odm_texturing"])
 
     log.ODM_INFO('OpenDroneMap app finished - %s' % system.now())
