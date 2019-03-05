@@ -1,5 +1,4 @@
 import ecto, os
-from psutil import virtual_memory
 
 from opendm import io
 from opendm import log
@@ -7,6 +6,7 @@ from opendm import system
 from opendm import context
 from opendm import types
 from opendm import gsd
+from opendm.concurrency import get_max_memory
 from opendm.cropper import Cropper
 
 
@@ -69,7 +69,8 @@ class ODMOrthoPhotoCell(ecto.Cell):
             # TODO: we should move this to a more central
             # location (perhaps during the dataset initialization)
             if georef and not georef.utm_east_offset:
-                odm_georeferencing_model_txt_geo_file = os.path.join(tree.odm_georeferencing, tree.odm_georeferencing_model_txt_geo)
+                georeferencing_dir = tree.odm_georeferencing if args.use_3dmesh and not args.skip_3dmodel else tree.odm_25dgeoreferencing
+                odm_georeferencing_model_txt_geo_file = os.path.join(georeferencing_dir, tree.odm_georeferencing_model_txt_geo)
 
                 if io.file_exists(odm_georeferencing_model_txt_geo_file):
                     georef.extract_offsets(odm_georeferencing_model_txt_geo_file)
@@ -127,7 +128,7 @@ class ODMOrthoPhotoCell(ecto.Cell):
                     'png': tree.odm_orthophoto_file,
                     'tiff': tree.odm_orthophoto_tif,
                     'log': tree.odm_orthophoto_tif_log,
-                    'max_memory': max(5, (100 - virtual_memory().percent) / 2),
+                    'max_memory': get_max_memory(),
                     'threads': self.params.max_concurrency
                 }
 

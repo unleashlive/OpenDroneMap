@@ -17,15 +17,15 @@ RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
 
 # All packages (Will install much faster)
 RUN apt-get install --no-install-recommends -y git cmake python-pip build-essential software-properties-common python-software-properties libgdal-dev gdal-bin libgeotiff-dev \
-libgtk2.0-dev libavcodec-dev libavformat-dev libswscale-dev python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libflann-dev \
+libgtk2.0-dev libavcodec-dev libavformat-dev libswscale-dev python-dev libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libflann-dev \
 libproj-dev libxext-dev liblapack-dev libeigen3-dev libvtk6-dev python-networkx libgoogle-glog-dev libsuitesparse-dev libboost-filesystem-dev libboost-iostreams-dev \
-libboost-regex-dev libboost-python-dev libboost-date-time-dev libboost-thread-dev python-pyproj python-empy python-nose python-pyside python-pyexiv2 python-scipy \
-libexiv2-dev liblas-bin python-matplotlib libatlas-base-dev libgmp-dev libmpfr-dev swig2.0 python-wheel libboost-log-dev libjsoncpp-dev nodejs imagemagick python-gdal
+libboost-regex-dev libboost-python-dev libboost-date-time-dev libboost-thread-dev python-pyproj python-empy python-nose python-pyside python-scipy \
+libexiv2-dev liblas-bin python-matplotlib libatlas-base-dev libgmp-dev libmpfr-dev  swig2.0 python-wheel libboost-log-dev libjsoncpp-dev python-gdal nodejs imagemagick
 
 RUN apt-get remove libdc1394-22-dev
 RUN pip install --upgrade pip
 RUN pip install setuptools
-RUN pip install -U PyYAML exifread gpxpy xmltodict catkin-pkg appsettings https://github.com/gipit/gippy/archive/1.0.0.zip loky shapely numpy pyproj psutil repoze.lru && pip install -U scipy --ignore-installed
+RUN pip install -U PyYAML exifread gpxpy xmltodict catkin-pkg appsettings https://github.com/OpenDroneMap/gippy/archive/numpyfix.zip loky shapely scipy numpy==1.15.4 pyproj psutil repoze.lru
 
 #install obj2gltf
 RUN npm -g install github:AnalyticalGraphicsInc/obj2gltf.git
