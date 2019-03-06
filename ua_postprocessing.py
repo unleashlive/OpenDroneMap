@@ -8,8 +8,8 @@ def resize_textures(project_path):
     resized_4x_folder = "resized_4x"
 
     # due to imagemagick bug, its impossible to have colon : in the -path param content, so use 'cd' to get relative path
-    resize_2x_command = 'cd ' + odm_texturing_folder + ' && mkdir ' + resized_2x_folder + ' && mogrify -adaptive-resize 50% -path ' + resized_2x_folder + ' -format png ' + './*.png'
-    resize_4x_command = 'cd ' + odm_texturing_folder + ' && mkdir ' + resized_4x_folder + ' && mogrify -adaptive-resize 25% -path ' + resized_4x_folder + ' -format png ' + './*.png'
+    resize_2x_command = 'cd ' + odm_texturing_folder + ' && mkdir -p ' + resized_2x_folder + ' && mogrify -adaptive-resize 50% -path ' + resized_2x_folder + ' -format png ' + './*.png'
+    resize_4x_command = 'cd ' + odm_texturing_folder + ' && mkdir -p ' + resized_4x_folder + ' && mogrify -adaptive-resize 25% -path ' + resized_4x_folder + ' -format png ' + './*.png'
     os.system(resize_2x_command)
     os.system(resize_4x_command)
     # create symlinks that are needed to generate glb files
@@ -48,4 +48,4 @@ def cleanTextures(project_path):
 def tif2tiles(project_path):
     inputOrthoFile = project_path + "/odm_orthophoto/odm_orthophoto.tif"
     outputOrthoTilesFolder = project_path + "/odm_orthophoto/tiles/"
-    os.system('gdal2tiles.py -n ' + inputOrthoFile + ' ' + outputOrthoTilesFolder)
+    os.system('gdal2tiles_parallel.py -e -p geodetic -n' + inputOrthoFile + ' ' + outputOrthoTilesFolder)

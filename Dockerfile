@@ -73,6 +73,7 @@ RUN rm -rf /code/SuperBuild/download /code/SuperBuild/src/opencv /code/SuperBuil
 COPY zip_results.py /code/zip_results.py
 COPY convert_obj_three.py /code/convert_obj_three.py
 COPY ua_postprocessing.py /code/ua_postprocessing.py
+COPY gdal2tiles_parallel.py /usr/bin/gdal2tiles_parallel.py
 
 # Entry point
 ENTRYPOINT ["python", "/code/run.py", "code"]
