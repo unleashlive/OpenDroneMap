@@ -11,6 +11,6 @@ def zipdir(foldername, ziph):
 def zip_dirs(dirs):
     print(dirs)
     for dir in dirs:
-        zipf = zipfile.ZipFile(dir+'.zip', 'w', zipfile.ZIP_DEFLATED)
+        zipf = zipfile.ZipFile(dir+'.zip', 'w', zipfile.ZIP_DEFLATED, allowZip64 = True)
         zipdir(dir+'/', zipf)
         zipf.close()
