@@ -50,5 +50,5 @@ def tif2tiles(project_path):
     outputOrthoTilesFolder = project_path + "/odm_orthophoto/tiles/"
     os.system('cp -v ' + inputOrthoFile + ' ./odm_orthophoto.tif')
     # os.system('gdal2tiles_parallel.py -e -p geodetic ./odm_orthophoto.tif ./tiles/')
-    os.system('gdal2tiles.py -n  ./odm_orthophoto.tif ./tiles/')
-    os.system('cp -rv ./tiles/* ' + outputOrthoTilesFolder)
+    os.system('gdal2tiles.py -n --processes=4 ./odm_orthophoto.tif ./tiles/')
+    os.system('cp -r ./tiles/* ' + outputOrthoTilesFolder)
