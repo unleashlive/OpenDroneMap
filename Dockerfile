@@ -7,7 +7,7 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update -y
 RUN apt-get install software-properties-common -y
 #Required Requisites
-RUN add-apt-repository ppa:nextgis/ppa
+#RUN add-apt-repository ppa:nextgis/ppa
 RUN add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
 RUN add-apt-repository -y ppa:ubuntugis/ppa
 RUN add-apt-repository -y ppa:george-edison55/cmake-3.x
@@ -17,7 +17,7 @@ RUN apt-get update -y
 RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
 
 # All packages (Will install much faster)
-apt-get install --no-install-recommends -y git cmake python-pip build-essential software-properties-common python-software-properties libgdal-dev gdal-bin libgeotiff-dev \
+RUN apt-get install --no-install-recommends -y git cmake python-pip build-essential software-properties-common python-software-properties libgdal-dev gdal-bin libgeotiff-dev \
 libgtk2.0-dev libavcodec-dev libavformat-dev libswscale-dev python-dev libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libflann-dev \
 libproj-dev libxext-dev liblapack-dev libeigen3-dev libvtk6-dev python-networkx libgoogle-glog-dev libsuitesparse-dev libboost-filesystem-dev libboost-iostreams-dev \
 libboost-regex-dev libboost-python-dev libboost-date-time-dev libboost-thread-dev python-pyproj python-empy python-nose python-pyside python-scipy \
