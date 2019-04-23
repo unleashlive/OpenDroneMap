@@ -1,4 +1,6 @@
 import os
+import json
+import numpy as np
 
 def resize_textures(project_path):
     odm_texturing_folder = project_path + "/odm_texturing/"
@@ -52,3 +54,26 @@ def tif2tiles(project_path):
     # os.system('gdal2tiles_parallel.py -e -p geodetic ./odm_orthophoto.tif ./tiles/')
     os.system('gdal2tiles.py -n ./odm_orthophoto.tif ./tiles/')
     os.system('mkdir -p ' + outputOrthoTilesFolder + ' && cp -r ./tiles/* ' + outputOrthoTilesFolder)
+
+def calculate_mean_recon_error(reconstruction_json):
+    """
+    Computes the average error rate of an OpenSfM reconstruction.
+    :param reconstruction_json path to OpenSfM's reconstruction.json
+    :return mean recon error
+    """
+    if not os.path.isfile(reconstruction_json):
+        raise IOError(reconstruction_json + " does not exist.")
+
+    with open(reconstruction_json) as f:
+        data = json.load(f)
+
+    # Calculate median error from sparse reconstruction
+    reconstruction = data[0]
+    reprojection_errors = []
+
+    for pointId in reconstruction['points']:
+        point = reconstruction['points'][pointId]
+        reprojection_errors.append(point['reprojection_error'])
+
+    reprojection_error = np.median(reprojection_errors)
+    return reprojection_error
