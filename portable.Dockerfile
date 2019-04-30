@@ -3,7 +3,6 @@ FROM phusion/baseimage
 # Env variables
 ENV DEBIAN_FRONTEND noninteractive
 
-#RUN add-apt-repository ppa:nextgis/ppa
 #Install dependencies and required requisites
 RUN apt-get update -y \
   && apt-get install -y \
@@ -11,9 +10,6 @@ RUN apt-get update -y \
   && add-apt-repository -y ppa:ubuntugis/ppa \
   && add-apt-repository -y ppa:george-edison55/cmake-3.x \
   && apt-get update -y
-
-#prepare node installation
-RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
 
 # All packages (Will install much faster)
 RUN apt-get install --no-install-recommends -y \
@@ -62,9 +58,8 @@ RUN apt-get install --no-install-recommends -y \
   python-pyside \
   python-software-properties \
   python-wheel \
-  swig2.0 \
-  nodejs \
-  imagemagick
+  swig2.0
+
 RUN apt-get remove libdc1394-22-dev
 RUN pip install --upgrade pip
 RUN pip install setuptools
@@ -83,9 +78,6 @@ RUN pip install -U \
   shapely \
   xmltodict \
   https://github.com/OpenDroneMap/gippy/archive/numpyfix.zip
-
-#install obj2gltf
-RUN npm -g install github:AnalyticalGraphicsInc/obj2gltf.git
 
 ENV PYTHONPATH="$PYTHONPATH:/code/SuperBuild/install/lib/python2.7/dist-packages"
 ENV PYTHONPATH="$PYTHONPATH:/code/SuperBuild/src/opensfm"
@@ -109,6 +101,13 @@ COPY /SuperBuild/CMakeLists.txt /code/SuperBuild/CMakeLists.txt
 COPY docker.settings.yaml /code/settings.yaml
 COPY VERSION /code/VERSION
 
+# Replace g++ and gcc with our own scripts
+COPY /docker/ /code/docker/
+RUN mv -v /usr/bin/gcc /usr/bin/gcc_real \
+  && mv -v /usr/bin/g++ /usr/bin/g++_real \
+  && cp -v /code/docker/gcc /usr/bin/gcc \
+  && cp -v /code/docker/g++ /usr/bin/g++
+
 # Compile code in SuperBuild and root directories
 RUN cd SuperBuild \
   && mkdir build \
@@ -131,7 +130,7 @@ RUN apt-get -y remove \
 RUN apt-get install -y libvtk6-dev
 
 # Cleanup APT
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* 
 
 # Clean Superbuild
 RUN rm -rf \
@@ -143,12 +142,6 @@ RUN rm -rf \
   /code/SuperBuild/src/opengv \
   /code/SuperBuild/src/pcl \
   /code/SuperBuild/src/pdal
-
-#copy code files
-COPY zip_results.py /code/zip_results.py
-COPY convert_obj_three.py /code/convert_obj_three.py
-COPY ua_postprocessing.py /code/ua_postprocessing.py
-COPY gdal2tiles_parallel.py /usr/bin/gdal2tiles_parallel.py
 
 # Entry point
 ENTRYPOINT ["python", "/code/run.py", "code"]
