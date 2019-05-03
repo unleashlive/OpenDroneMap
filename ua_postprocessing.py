@@ -52,7 +52,7 @@ def tif2tiles(project_path):
     outputOrthoTilesFolder = project_path + "/odm_orthophoto/tiles/"
     os.system('cp -v ' + inputOrthoFile + ' ./odm_orthophoto.tif')
     # os.system('gdal2tiles_parallel.py -e -p geodetic ./odm_orthophoto.tif ./tiles/')
-    os.system('gdal2tiles.py -n ./odm_orthophoto.tif ./tiles/')
+    os.system('gdal2tiles.py -z 10-22 -n ./odm_orthophoto.tif ./tiles/')
     os.system('mkdir -p ' + outputOrthoTilesFolder + ' && cp -r ./tiles/* ' + outputOrthoTilesFolder)
 
 def calculate_mean_recon_error(reconstruction_json):
