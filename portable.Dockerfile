@@ -7,7 +7,7 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update -y \
   && apt-get install -y \
     software-properties-common \
-  && add-apt-repository -y ppa:ubuntugis/ppa \
+  && add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable \
   && add-apt-repository -y ppa:george-edison55/cmake-3.x \
   && apt-get update -y
 
@@ -48,36 +48,38 @@ RUN apt-get install --no-install-recommends -y \
   libvtk6-dev \
   libxext-dev \
   python-dev \
-  python-empy \
   python-gdal \
   python-matplotlib \
   python-networkx \
-  python-nose \
   python-pip \
   python-pyproj \
-  python-pyside \
   python-software-properties \
   python-wheel \
-  swig2.0
+  swig2.0 \
+  grass-core
 
 RUN apt-get remove libdc1394-22-dev
 RUN pip install --upgrade pip
 RUN pip install setuptools
 RUN pip install -U \
   appsettings \
-  catkin-pkg \
   exifread \
   gpxpy \
   loky \
   numpy==1.15.4 \
   psutil \
   pyproj \
-  PyYAML \
+  PyYAML==3.13 \
   repoze.lru \
-  scipy \
+  scipy==1.2.1 \
   shapely \
   xmltodict \
-  https://github.com/OpenDroneMap/gippy/archive/numpyfix.zip
+  rasterio \
+  attrs==19.1.0 \
+  pyodm==1.5.2b1 \
+  Pillow
+
+RUN pip install --upgrade cryptography && python -m easy_install --upgrade pyOpenSSL
 
 ENV PYTHONPATH="$PYTHONPATH:/code/SuperBuild/install/lib/python2.7/dist-packages"
 ENV PYTHONPATH="$PYTHONPATH:/code/SuperBuild/src/opensfm"
@@ -92,10 +94,9 @@ COPY CMakeLists.txt /code/CMakeLists.txt
 COPY configure.sh /code/configure.sh
 COPY /modules/ /code/modules/
 COPY /opendm/ /code/opendm/
-COPY /patched_files/ /code/patched_files/
 COPY run.py /code/run.py
 COPY run.sh /code/run.sh
-COPY /scripts/ /code/scripts/
+COPY /stages/ /code/stages/
 COPY /SuperBuild/cmake/ /code/SuperBuild/cmake/
 COPY /SuperBuild/CMakeLists.txt /code/SuperBuild/CMakeLists.txt
 COPY docker.settings.yaml /code/settings.yaml
@@ -120,15 +121,6 @@ RUN cd SuperBuild \
   && cmake .. \
   && make -j$(nproc)
 
-RUN apt-get -y remove \
-  git \
-  build-essential \
-  cmake \
-  libgl1-mesa-dri \
-  python-pip
-
-RUN apt-get install -y libvtk6-dev
-
 # Cleanup APT
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* 
 
@@ -144,5 +136,5 @@ RUN rm -rf \
   /code/SuperBuild/src/pdal
 
 # Entry point
-ENTRYPOINT ["python", "/code/run.py", "code"]
+ENTRYPOINT ["python", "/code/run.py"]
 
