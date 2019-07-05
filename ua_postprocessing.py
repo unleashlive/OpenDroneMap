@@ -2,6 +2,7 @@ import os
 import json
 import numpy as np
 
+
 def resize_textures(project_path):
     odm_texturing_folder = project_path + "/odm_texturing/"
     inputObjFile = "odm_textured_model.obj"
@@ -24,10 +25,12 @@ def resize_textures(project_path):
     os.system('cp ' + outputBINFile + ' ' + odm_texturing_folder + resized_2x_folder)
     os.system('cp ' + outputBINFile + ' ' + odm_texturing_folder + resized_4x_folder)
 
+
 def obj2gltf(project_path):
     inputFile = project_path + "/odm_texturing/odm_textured_model.obj"
     outputGLTFFile = project_path + "/odm_texturing/odm_textured_model.gltf"
     os.system('obj2gltf -s --checkTransparency -i ' + inputFile + ' -o ' + outputGLTFFile)
+
 
 def obj2glb(project_path):
     odm_texturing_folder = project_path + "/odm_texturing/"
@@ -35,8 +38,11 @@ def obj2glb(project_path):
     outputGLBFile = "odm_textured_model.glb"
     resized_2x_folder = odm_texturing_folder + "resized_2x/"
     resized_4x_folder = odm_texturing_folder + "resized_4x/"
-    os.system('obj2gltf -b --checkTransparency -i ' + resized_2x_folder + inputFile + ' -o ' + resized_2x_folder + outputGLBFile)
-    os.system('obj2gltf -b --checkTransparency -i ' + resized_4x_folder + inputFile + ' -o ' + resized_4x_folder + outputGLBFile)
+    os.system(
+        'obj2gltf -b --checkTransparency -i ' + resized_2x_folder + inputFile + ' -o ' + resized_2x_folder + outputGLBFile)
+    os.system(
+        'obj2gltf -b --checkTransparency -i ' + resized_4x_folder + inputFile + ' -o ' + resized_4x_folder + outputGLBFile)
+
 
 # after converting obj to glb all the textures are redundant
 def cleanTextures(project_path):
@@ -54,6 +60,7 @@ def tif2tiles(project_path):
     # os.system('gdal2tiles_parallel.py -e -p geodetic ./odm_orthophoto.tif ./tiles/')
     os.system('gdal2tiles.py -n ./odm_orthophoto.tif ./tiles/')
     os.system('mkdir -p ' + outputOrthoTilesFolder + ' && cp -r ./tiles/* ' + outputOrthoTilesFolder)
+
 
 def calculate_mean_recon_error(reconstruction_json):
     """
