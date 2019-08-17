@@ -133,7 +133,8 @@ class OSFMContext:
 
             if gcp_path:
                 config.append("bundle_use_gcp: yes")
-                config.append("bundle_use_gps: no")
+                if not args.force_gps:
+                    config.append("bundle_use_gps: no")
                 io.copy(gcp_path, self.path("gcp_list.txt"))
             
             config = config + append_config
@@ -284,15 +285,16 @@ def get_submodel_argv(project_name = None, submodels_path = None, submodel_name 
         
         if i == 1 and project_name and submodel_name and arg == project_name:
             i += 1
+            continue
         elif i == len(argv) - 1:
             # Project name?
             if project_name and submodel_name and arg == project_name:
                 result.append(submodel_name)
                 found_args['project_name'] = True
-            elif arg.startswith("--"):
-                result.append(arg)
-            i += 1
-        elif arg == '--project-path':
+                i += 1
+                continue
+        
+        if arg == '--project-path':
             if submodels_path:
                 result.append(arg)
                 result.append(submodels_path)

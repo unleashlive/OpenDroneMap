@@ -62,7 +62,8 @@ RUN apt-get install --no-install-recommends -y \
   swig2.0 \
   nodejs \
   imagemagick \
-  grass-core
+  grass-core \
+  libssl-dev
 
 RUN apt-get remove libdc1394-22-dev
 RUN pip install --upgrade pip
