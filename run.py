@@ -73,11 +73,11 @@ if __name__ == '__main__':
     ua_postprocessing.tif2tiles(args.project_path)
 
     # ZIP RESULTS
-    zip_results.zip_dirs([args.project_path + "/odm_georeferencing",
-                    args.project_path + "/odm_meshing",
-                    args.project_path + "/odm_orthophoto",
-                    args.project_path + "/odm_dem",
-                    args.project_path + "/odm_texturing"])
+    # zip_results.zip_dirs([args.project_path + "/odm_georeferencing",
+    #                 args.project_path + "/odm_meshing",
+    #                 args.project_path + "/odm_orthophoto",
+    #                 args.project_path + "/odm_dem",
+    #                 args.project_path + "/odm_texturing"])
 
     # Do not show ASCII art for local submodels runs
     if not "submodels/submodel_" in args.project_path:
