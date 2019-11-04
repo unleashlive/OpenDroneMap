@@ -50,8 +50,8 @@ class Cropper:
             run('gdalwarp -cutline {gpkg_path} '
                 '-crop_to_cutline '
                 '{options} '
-                '{geotiffInput} '
-                '{geotiffOutput} '
+                '"{geotiffInput}" '
+                '"{geotiffOutput}" '
                 '--config GDAL_CACHEMAX {max_memory}%'.format(**kwargs))
 
             if not keep_original:
@@ -145,7 +145,7 @@ class Cropper:
 
         boundary_file_path = self.path('boundary.json')
 
-        run('pdal info --boundary --filters.hexbin.edge_size=1 --filters.hexbin.threshold=0 {0} > {1}'.format(decimated_pointcloud_path,  boundary_file_path))
+        run('pdal info --boundary --filters.hexbin.edge_size=1 --filters.hexbin.threshold=0 "{0}" > "{1}"'.format(decimated_pointcloud_path,  boundary_file_path))
         
         pc_geojson_boundary_feature = None
 
@@ -228,7 +228,7 @@ class Cropper:
         bounds_geojson_path = self.create_bounds_geojson(pointcloud_path, buffer_distance, decimation_step)
 
         summary_file_path = os.path.join(self.storage_dir, '{}.summary.json'.format(self.files_prefix))
-        run('pdal info --summary {0} > {1}'.format(pointcloud_path, summary_file_path))
+        run('pdal info --summary "{0}" > "{1}"'.format(pointcloud_path, summary_file_path))
         
         pc_proj4 = None
         with open(summary_file_path, 'r') as f:
@@ -246,7 +246,7 @@ class Cropper:
             'proj4': pc_proj4
         }
 
-        run('ogr2ogr -overwrite -f GPKG -a_srs "{proj4}" {output} {input}'.format(**kwargs))
+        run('ogr2ogr -overwrite -f GPKG -a_srs "{proj4}" "{output}" "{input}"'.format(**kwargs))
 
         return bounds_gpkg_path
 

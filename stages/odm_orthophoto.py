@@ -60,9 +60,9 @@ class ODMOrthoPhotoStage(types.ODM_Stage):
                     kwargs['model_geo'] = os.path.join(tree.odm_25dtexturing, tree.odm_textured_model_obj)
 
             # run odm_orthophoto
-            system.run('{bin}/odm_orthophoto -inputFile {model_geo} '
-                       '-logFile {log} -outputFile {ortho} -resolution {res} {verbose} '
-                       '-outputCornerFile {corners}'.format(**kwargs))
+            system.run('{bin}/odm_orthophoto -inputFile "{model_geo}" '
+                       '-logFile "{log}" -outputFile "{ortho}" -resolution {res} {verbose} '
+                       '-outputCornerFile "{corners}"'.format(**kwargs))
 
             # Create georeferenced GeoTiff
             geotiffcreated = False
@@ -103,7 +103,7 @@ class ODMOrthoPhotoStage(types.ODM_Stage):
                            '{vars} '
                            '-a_srs \"{proj}\" '
                            '--config GDAL_CACHEMAX {max_memory}% '
-                           '{png} {tiff} > {log}'.format(**kwargs))
+                           '"{png}" "{tiff}" > "{log}"'.format(**kwargs))
 
                 bounds_file_path = os.path.join(tree.odm_georeferencing, 'odm_georeferenced_model.bounds.gpkg')
                     

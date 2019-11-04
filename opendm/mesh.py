@@ -64,8 +64,8 @@ def dem_to_points(inGeotiff, outPointCloud, verbose=False):
         'verbose': '-verbose' if verbose else ''
     }
 
-    system.run('{bin} -inputFile {infile} '
-         '-outputFile {outfile} '
+    system.run('{bin} -inputFile "{infile}" '
+         '-outputFile "{outfile}" '
          '-skirtHeightThreshold 1.5 '
          '-skirtIncrements 0.2 '
          '-skirtHeightCap 100 '
@@ -95,8 +95,8 @@ def dem_to_mesh_gridded(inGeotiff, outMesh, maxVertexCount, verbose=False):
         'verbose': '-verbose' if verbose else ''
     }
 
-    system.run('{bin} -inputFile {infile} '
-         '-outputFile {outfile} '
+    system.run('{bin} -inputFile "{infile}" '
+         '-outputFile "{outfile}" '
          '-maxTileLength 4000 '
          '-maxVertexCount {maxVertexCount} '
          ' {verbose} '.format(**kwargs))
@@ -111,8 +111,8 @@ def dem_to_mesh_gridded(inGeotiff, outMesh, maxVertexCount, verbose=False):
         'verbose': '-verbose' if verbose else ''
     }
 
-    system.run('{bin}/odm_cleanmesh -inputFile {infile} '
-         '-outputFile {outfile} '
+    system.run('{bin}/odm_cleanmesh -inputFile "{infile}" '
+         '-outputFile "{outfile}" '
          '-removeIslands '
          '-decimateMesh {max_vertex} {verbose} '.format(**cleanupArgs))
 
@@ -146,8 +146,8 @@ def screened_poisson_reconstruction(inPointCloud, outMesh, depth = 8, samples = 
     }
 
     # Run PoissonRecon
-    system.run('{bin} --in {infile} '
-             '--out {outfile} '
+    system.run('{bin} --in "{infile}" '
+             '--out "{outfile}" '
              '--depth {depth} '
              '--pointWeight {pointWeight} '
              '--samplesPerNode {samples} '
@@ -164,8 +164,8 @@ def screened_poisson_reconstruction(inPointCloud, outMesh, depth = 8, samples = 
         'verbose': '-verbose' if verbose else ''
     }
 
-    system.run('{bin}/odm_cleanmesh -inputFile {infile} '
-         '-outputFile {outfile} '
+    system.run('{bin}/odm_cleanmesh -inputFile "{infile}" '
+         '-outputFile "{outfile}" '
          '-removeIslands '
          '-decimateMesh {max_vertex} {verbose} '.format(**cleanupArgs))
 

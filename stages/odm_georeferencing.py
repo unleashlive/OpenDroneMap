@@ -68,7 +68,7 @@ class ODMGeoreferencingStage(types.ODM_Stage):
                 }
 
                 if transformPointCloud:
-                    kwargs['pc_params'] = '-inputPointCloudFile {input_pc_file} -outputPointCloudFile {output_pc_file}'.format(**kwargs)
+                    kwargs['pc_params'] = '-inputPointCloudFile "{input_pc_file}" -outputPointCloudFile "{output_pc_file}"'.format(**kwargs)
 
                     if reconstruction.is_georeferenced():
                         kwargs['pc_params'] += ' -outputPointCloudSrs %s' % pipes.quote(reconstruction.georef.proj4())
@@ -79,16 +79,16 @@ class ODMGeoreferencingStage(types.ODM_Stage):
  
                 if io.file_exists(tree.opensfm_transformation) and io.file_exists(tree.odm_georeferencing_coords):
                     log.ODM_INFO('Running georeferencing with OpenSfM transformation matrix')
-                    system.run('{bin}/odm_georef -bundleFile {bundle} -inputTransformFile {input_trans_file} -inputCoordFile {coords} '
-                               '-inputFile {model} -outputFile {model_geo} '
+                    system.run('{bin}/odm_georef -bundleFile "{bundle}" -inputTransformFile "{input_trans_file}" -inputCoordFile "{coords}" '
+                               '-inputFile "{model}" -outputFile "{model_geo}" '
                                '{pc_params} {verbose} '
-                               '-logFile {log} -outputTransformFile {transform_file} -georefFileOutputPath {geo_sys}'.format(**kwargs))
+                               '-logFile "{log}" -outputTransformFile "{transform_file}" -georefFileOutputPath "{geo_sys}"'.format(**kwargs))
                 elif io.file_exists(tree.odm_georeferencing_coords):
                     log.ODM_INFO('Running georeferencing with generated coords file.')
-                    system.run('{bin}/odm_georef -bundleFile {bundle} -inputCoordFile {coords} '
-                               '-inputFile {model} -outputFile {model_geo} '
+                    system.run('{bin}/odm_georef -bundleFile "{bundle}" -inputCoordFile "{coords}" '
+                               '-inputFile "{model}" -outputFile "{model_geo}" '
                                '{pc_params} {verbose} '
-                               '-logFile {log} -outputTransformFile {transform_file} -georefFileOutputPath {geo_sys}'.format(**kwargs))
+                               '-logFile "{log}" -outputTransformFile "{transform_file}" -georefFileOutputPath "{geo_sys}"'.format(**kwargs))
                 else:
                     log.ODM_WARNING('Georeferencing failed. Make sure your '
                                     'photos have geotags in the EXIF or you have '

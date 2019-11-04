@@ -237,13 +237,13 @@ class ODMMergeStage(types.ODM_Stage):
                         if io.file_exists(merged_geotiff):
                             os.remove(merged_geotiff)
 
-                        system.run('gdal_merge.py -o {orthophoto_merged} '
+                        system.run('gdal_merge.py -o "{orthophoto_merged}" '
                                 #'-createonly '
                                 '-co "BIGTIFF=YES" '
                                 '-co "BLOCKXSIZE=512" '
                                 '-co "BLOCKYSIZE=512" '
                                 '--config GDAL_CACHEMAX {max_memory}% '
-                                '{input_files} '.format(**kwargs)
+                                '"{input_files}" '.format(**kwargs)
                                 )
 
                         for ortho_cutline in all_orthos_and_cutlines:
@@ -255,7 +255,7 @@ class ODMMergeStage(types.ODM_Stage):
                                     '-r bilinear -multi '
                                     '-wo NUM_THREADS={threads} '
                                     '--config GDAL_CACHEMAX {max_memory}% '
-                                    '{input_file} {orthophoto_merged}'.format(**kwargs)
+                                    '"{input_file}" "{orthophoto_merged}"'.format(**kwargs)
                             )
 
                         # Apply orthophoto settings (compression, tiling, etc.)

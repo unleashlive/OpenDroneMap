@@ -36,8 +36,8 @@ def filter(input_point_cloud, output_point_cloud, standard_deviation=2.5, meank=
       'confidence': '-confidence %s' % confidence if confidence else '',
     }
 
-    system.run('{bin} -inputFile {inputFile} '
-         '-outputFile {outputFile} '
+    system.run('{bin} -inputFile "{inputFile}" '
+         '-outputFile "{outputFile}" '
          '-sd {sd} '
          '-meank {meank} {confidence} {verbose} '.format(**filterArgs))
 
