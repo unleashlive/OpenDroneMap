@@ -7,17 +7,20 @@ else
 fi
 
 install() {
+
+cd /code
     ## Set up library paths
     export PYTHONPATH=$RUNPATH/SuperBuild/install/lib/python2.7/dist-packages:$RUNPATH/SuperBuild/src/opensfm:$PYTHONPATH
     export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$RUNPATH/SuperBuild/install/lib
 
-    ## Before installing
+    
+	## Before installing
     echo "Updating the system"
-    add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
-    apt-get update
+    sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
+    
 
     echo "Installing Required Requisites"
-    apt-get install -y -qq build-essential \
+    sudo apt-get install -y -qq build-essential \
                          git \
                          cmake \
                          python-pip \
@@ -30,18 +33,13 @@ install() {
                          grass-core \
                          libssl-dev \
                          liblas-bin \
-                         swig2.0 \
+                         swig3.0 \
                          python-wheel \
                          libboost-log-dev
 
-    echo "Getting CMake 3.1 for MVS-Texturing"
-    apt-get install -y software-properties-common python-software-properties
-    add-apt-repository -y ppa:george-edison55/cmake-3.x
-    apt-get update -y
-    apt-get install -y --only-upgrade cmake
 
     echo "Installing OpenCV Dependencies"
-    apt-get install -y -qq libgtk2.0-dev \
+    sudo apt-get install -y -qq libgtk2.0-dev \
                          libavcodec-dev \
                          libavformat-dev \
                          libswscale-dev \
@@ -51,19 +49,20 @@ install() {
                          libjpeg-dev \
                          libpng-dev \
                          libtiff-dev \
-                         libjasper-dev \
                          libflann-dev \
                          libproj-dev \
                          libxext-dev \
                          liblapack-dev \
                          libeigen3-dev \
                          libvtk6-dev
-
-    echo "Removing libdc1394-22-dev due to python opencv issue"
-    apt-get remove libdc1394-22-dev
-
+						 
+	sudo add-apt-repository "deb http://security.ubuntu.com/ubuntu xenial-security main"
+        sudo apt-get update
+	sudo apt-get install -y -qq libjasper1 \
+                         libjasper-dev
+	
     echo "Installing OpenSfM Dependencies"
-    apt-get install -y -qq libgoogle-glog-dev \
+    sudo apt-get install -y -qq libgoogle-glog-dev \
                          libsuitesparse-dev \
                          libboost-filesystem-dev \
                          libboost-iostreams-dev \
@@ -72,7 +71,7 @@ install() {
                          libboost-date-time-dev \
                          libboost-thread-dev
 
-    pip install -r "${RUNPATH}/requirements.txt"
+    pip install -r "/code/requirements.txt"
 
     # Fix:  /usr/local/lib/python2.7/dist-packages/requests/__init__.py:83: RequestsDependencyWarning: Old version of cryptography ([1, 2, 3]) may cause slowdown.
     pip install --upgrade cryptography
@@ -87,7 +86,7 @@ install() {
     cd ${RUNPATH}
     mkdir -p build && cd build
     cmake .. && make -j$processes
-
+	
     echo "Configuration Finished"
 }
 
@@ -104,7 +103,6 @@ reinstall() {
     uninstall
     install
 }
-
 usage() {
     echo "Usage:"
     echo "bash configure.sh <install|update|uninstall|help> [nproc]"
@@ -120,7 +118,7 @@ usage() {
     echo "[nproc] is an optional argument that can set the number of processes for the make -j tag. By default it uses $(nproc)"
 }
 
-if [[ $1 =~ ^(install|reinstall|uninstall|usage)$ ]]; then
+if [[ $1 =~ ^(install|reinstall|uninstall)$ ]]; then
     RUNPATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
     "$1"
 else

@@ -54,9 +54,7 @@ RUN apt-get install --no-install-recommends -y \
   python-dev \
   python-gdal \
   python-matplotlib \
-  python-networkx \
   python-pip \
-  python-pyproj \
   python-software-properties \
   python-wheel \
   swig2.0 \
@@ -68,32 +66,9 @@ RUN apt-get install --no-install-recommends -y \
 RUN apt-get remove libdc1394-22-dev
 RUN pip install --upgrade pip
 RUN pip install setuptools
-RUN pip install -U \
-  appsettings \
-  exifread \
-  gpxpy \
-  loky \
-  numpy==1.15.4 \
-  psutil \
-  pyproj \
-  PyYAML==3.13 \
-  repoze.lru \
-  scipy==1.2.1 \
-  shapely \
-  xmltodict \
-  rasterio \
-  attrs==19.1.0 \
-  pyodm==1.5.2b1 \
-  Pillow
-
-RUN pip install --upgrade cryptography && python -m easy_install --upgrade pyOpenSSL
 
 #install obj2gltf
 RUN npm -g install github:AnalyticalGraphicsInc/obj2gltf.git
-
-ENV PYTHONPATH="$PYTHONPATH:/code/SuperBuild/install/lib/python2.7/dist-packages"
-ENV PYTHONPATH="$PYTHONPATH:/code/SuperBuild/src/opensfm"
-ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/code/SuperBuild/install/lib"
 
 # Prepare directories
 RUN mkdir /code
@@ -111,6 +86,14 @@ COPY /SuperBuild/cmake/ /code/SuperBuild/cmake/
 COPY /SuperBuild/CMakeLists.txt /code/SuperBuild/CMakeLists.txt
 COPY docker.settings.yaml /code/settings.yaml
 COPY VERSION /code/VERSION
+COPY requirements.txt /code/requirements.txt
+
+RUN pip install -r requirements.txt
+RUN pip install --upgrade cryptography && python -m easy_install --upgrade pyOpenSSL
+
+ENV PYTHONPATH="$PYTHONPATH:/code/SuperBuild/install/lib/python2.7/dist-packages"
+ENV PYTHONPATH="$PYTHONPATH:/code/SuperBuild/src/opensfm"
+ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/code/SuperBuild/install/lib"
 
 # Compile code in SuperBuild and root directories
 RUN cd SuperBuild \
@@ -125,7 +108,7 @@ RUN cd SuperBuild \
   && make -j$(nproc)
 
 # Cleanup APT
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* 
 
 # Clean Superbuild
 RUN rm -rf \

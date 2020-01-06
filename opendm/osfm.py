@@ -20,14 +20,6 @@ class OSFMContext:
         system.run('%s/bin/opensfm %s "%s"' %
                     (context.opensfm_path, command, self.opensfm_project_path))
 
-    def export_bundler(self, destination_bundle_file, rerun=False):
-        if not io.file_exists(destination_bundle_file) or rerun:
-                # convert back to bundler's format
-                system.run('%s/bin/export_bundler "%s"' %
-                        (context.opensfm_path, self.opensfm_project_path))
-        else:
-            log.ODM_WARNING('Found a valid Bundler file in: %s' % destination_bundle_file)
-
     def is_reconstruction_done(self):
         tracks_file = os.path.join(self.opensfm_project_path, 'tracks.csv')
         reconstruction_file = os.path.join(self.opensfm_project_path, 'reconstruction.json')
@@ -74,10 +66,13 @@ class OSFMContext:
             
             # create file list
             has_alt = True
+            has_gps = False
             with open(list_path, 'w') as fout:
                 for photo in photos:
                     if not photo.altitude:
                         has_alt = False
+                    if photo.latitude is not None and photo.longitude is not None:
+                        has_gps = True
                     fout.write('%s\n' % io.join_paths(images_path, photo.filename))
             
             # check for image_groups.txt (split-merge)
@@ -111,26 +106,33 @@ class OSFMContext:
                 "optimize_camera_parameters: %s" % ('no' if args.use_fixed_camera_params or args.cameras else 'yes'),
                 "undistorted_image_format: png", # mvs-texturing exhibits artifacts with JPG
                 "bundle_outlier_filtering_type: AUTO",
+                "align_orientation_prior: vertical",
             ]
 
-            # TODO: add BOW matching when dataset is not georeferenced (no gps)
+            if args.camera_lens != 'auto':
+                config.append("camera_projection_type: %s" % args.camera_lens.upper())
+
+            if not has_gps:
+                log.ODM_INFO("No GPS information, using BOW matching")
+                config.append("matcher_type: WORDS")
 
             if has_alt:
                 log.ODM_INFO("Altitude data detected, enabling it for GPS alignment")
                 config.append("use_altitude_tag: yes")
 
             if has_alt or gcp_path:
-                config.append("align_method: naive")
+                config.append("align_method: auto")
             else:
                 config.append("align_method: orientation_prior")
-                config.append("align_orientation_prior: vertical")
             
             if args.use_hybrid_bundle_adjustment:
                 log.ODM_INFO("Enabling hybrid bundle adjustment")
                 config.append("bundle_interval: 100")          # Bundle after adding 'bundle_interval' cameras
                 config.append("bundle_new_points_ratio: 1.2")  # Bundle when (new points) / (bundled points) > bundle_new_points_ratio
                 config.append("local_bundle_radius: 1")        # Max image graph distance for images to be included in local bundle adjustment
-
+            else:
+                config.append("local_bundle_radius: 0")
+                
             if gcp_path:
                 config.append("bundle_use_gcp: yes")
                 if not args.force_gps:
@@ -225,30 +227,6 @@ class OSFMContext:
         else:
             log.ODM_WARNING("Tried to update configuration, but %s does not exist." % cfg_file)
 
-    def save_absolute_image_list_to(self, file):
-        """
-        Writes a copy of the image_list.txt file and makes sure that all paths
-        written in it are absolute paths and not relative paths.
-        """
-        image_list_file = self.path("image_list.txt")
-
-        if io.file_exists(image_list_file):
-            with open(image_list_file, 'r') as f:
-                content = f.read()
-            
-            lines = []
-            for line in map(str.strip, content.split('\n')):
-                if line and not line.startswith("/"):
-                    line = os.path.abspath(os.path.join(self.opensfm_project_path, line))
-                lines.append(line)
-
-            with open(file, 'w') as f:
-                f.write("\n".join(lines))
-
-            log.ODM_INFO("Wrote %s with absolute paths" % file)
-        else:
-            log.ODM_WARNING("No %s found, cannot create %s" % (image_list_file, file))
-    
     def name(self):
         return os.path.basename(os.path.abspath(self.path("..")))
 
@@ -266,6 +244,7 @@ def get_submodel_argv(project_name = None, submodels_path = None, submodel_name 
         adding --orthophoto-cutline
         adding --dem-euclidean-map
         adding --skip-3dmodel (split-merge does not support 3D model merging)
+        tweaking --crop if necessary (DEM merging makes assumption about the area of DEMs and their euclidean maps that require cropping. If cropping is skipped, this leads to errors.)
         removing --gcp (the GCP path if specified is always "gcp_list.txt")
         reading the contents of --cameras
     """
@@ -304,6 +283,14 @@ def get_submodel_argv(project_name = None, submodels_path = None, submodel_name 
             result.append(arg)
             found_args[arg] = True
             i += 1
+        elif arg == '--crop':
+            result.append(arg)
+            crop_value = float(argv[i + 1])
+            if crop_value == 0:
+                crop_value = 0.015625
+            result.append(crop_value)
+            found_args[arg] = True
+            i += 2
         elif arg in read_json_always:
             try:
                 jsond = io.path_or_json_string_to_dict(argv[i + 1])
@@ -329,7 +316,7 @@ def get_submodel_argv(project_name = None, submodels_path = None, submodel_name 
     for arg in assure_always:
         if not found_args.get(arg):
             result.append(arg)
-
+    
     if not found_args.get('project_name') and submodel_name:
         result.append(submodel_name)
 

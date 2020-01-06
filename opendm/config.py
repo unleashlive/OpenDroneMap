@@ -70,9 +70,9 @@ def config():
                         metavar='<integer>',
                         default=2048,
                         type=int,
-                        help='Resizes images by the largest side for feature extraction. '
+                        help='Resizes images by the largest side for feature extraction purposes only. '
                              'Set to -1 to disable. This does not affect the final orthophoto '
-                             ' resolution quality. Default:  %(default)s')
+                             ' resolution quality and will not resize the original images. Default:  %(default)s')
 
     parser.add_argument('--end-with', '-e',
                         metavar='<string>',
@@ -149,6 +149,16 @@ def config():
                              'Can be specified either as path to a cameras.json file or as a '
                              'JSON string representing the contents of a '
                              'cameras.json file. Default: %(default)s')
+    
+    parser.add_argument('--camera-lens',
+            metavar='<string>',
+            default='auto',
+            choices=['auto', 'perspective', 'brown', 'fisheye', 'spherical'],
+            help=('Set a camera projection type. Manually setting a value '
+                'can help improve geometric undistortion. By default the application '
+                'tries to determine a lens type from the images metadata. Can be '
+                'set to one of: [auto, perspective, brown, fisheye, spherical]. Default: '
+                '%(default)s'))
 
     parser.add_argument('--max-concurrency',
                         metavar='<positive integer>',
@@ -308,6 +318,14 @@ def config():
                         type=float,
                         default=2.5,
                         help='Filters the point cloud by removing points that deviate more than N standard deviations from the local mean. Set to 0 to disable filtering.'
+                             '\nDefault: '
+                             '%(default)s')
+    
+    parser.add_argument('--pc-sample',
+                        metavar='<positive float>',
+                        type=float,
+                        default=0,
+                        help='Filters the point cloud by keeping only a single point around a radius N (in meters). This can be useful to limit the output resolution of the point cloud. Set to 0 to disable sampling.'
                              '\nDefault: '
                              '%(default)s')
 
@@ -488,16 +506,6 @@ def config():
                         help='Set the compression to use. Note that this could '
                              'break gdal_translate if you don\'t know what you '
                              'are doing. Options: %(choices)s.\nDefault: %(default)s')
-
-    parser.add_argument('--orthophoto-bigtiff',
-                        type=str,
-                        choices=['YES', 'NO','IF_NEEDED','IF_SAFER'],
-                        default='IF_SAFER',
-                        help='Control whether the created orthophoto is a BigTIFF or '
-                             'classic TIFF. BigTIFF is a variant for files larger than '
-                             '4GiB of data. Options are %(choices)s. See GDAL specs: '
-                             'https://www.gdal.org/frmt_gtiff.html for more info. '
-                             '\nDefault: %(default)s')
     
     parser.add_argument('--orthophoto-cutline',
             action='store_true',
@@ -577,8 +585,9 @@ def config():
     parser.add_argument('--force-gps',
                     action='store_true',
                     default=False,
-                    help=('Use images\' gps exif data for reconstruction, even if there are gcps present.'
-                          'This flag is useful if you have high precision gps measurements.'))
+                    help=('Use images\' GPS exif data for reconstruction, even if there are GCPs present.'
+                          'This flag is useful if you have high precision GPS measurements. '
+                          'If there are no GCPs, this flag does nothing. Default: %(default)s'))
 
     args = parser.parse_args()
 
