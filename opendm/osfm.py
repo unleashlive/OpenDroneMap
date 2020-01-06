@@ -64,7 +64,7 @@ class OSFMContext:
         Setup a OpenSfM project
         """
         if rerun and io.dir_exists(self.opensfm_project_path):
-            shutil.rmtree(self.opensfm_project_path)
+            shutil.rmtree(self.opensfm_project_path, ignore_errors=True)
 
         if not io.dir_exists(self.opensfm_project_path):
             system.mkdir_p(self.opensfm_project_path)

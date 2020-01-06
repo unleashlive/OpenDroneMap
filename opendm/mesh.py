@@ -14,7 +14,7 @@ def create_25dmesh(inPointCloud, outMesh, dsm_radius=0.07, dsm_resolution=0.05, 
     mesh_directory = os.path.dirname(outMesh)
     tmp_directory = os.path.join(mesh_directory, 'tmp')
     if os.path.exists(tmp_directory):
-        shutil.rmtree(tmp_directory)
+        shutil.rmtree(tmp_directory, ignore_errors=True)
     os.mkdir(tmp_directory)
     log.ODM_INFO('Created temporary directory: %s' % tmp_directory)
 
@@ -49,7 +49,7 @@ def create_25dmesh(inPointCloud, outMesh, dsm_radius=0.07, dsm_resolution=0.05, 
 
     # Cleanup tmp
     if os.path.exists(tmp_directory):
-        shutil.rmtree(tmp_directory)
+        shutil.rmtree(tmp_directory, ignore_errors=True)
 
     return mesh
 

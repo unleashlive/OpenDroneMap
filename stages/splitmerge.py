@@ -60,7 +60,7 @@ class ODMSplitStage(types.ODM_Stage):
                 if not io.dir_exists(tree.submodels_path) or self.rerun():
                     if io.dir_exists(tree.submodels_path):
                         log.ODM_WARNING("Removing existing submodels directory: %s" % tree.submodels_path)
-                        shutil.rmtree(tree.submodels_path)
+                        shutil.rmtree(tree.submodels_path, ignore_errors=True)
 
                     octx.run("create_submodels")
                 else:

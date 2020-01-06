@@ -23,7 +23,7 @@ class ODMMveStage(types.ODM_Stage):
         if not io.file_exists(tree.mve_model) or self.rerun():
             # cleanup if a rerun
             if io.dir_exists(tree.mve_path) and self.rerun():
-                shutil.rmtree(tree.mve_path)
+                shutil.rmtree(tree.mve_path, ignore_errors=True)
 
             # make bundle directory
             if not io.file_exists(tree.mve_bundle):
@@ -38,7 +38,7 @@ class ODMMveStage(types.ODM_Stage):
             # to not exists before executing it (otherwise it
             # will prompt the user for confirmation)
             if io.dir_exists(tree.mve):
-                shutil.rmtree(tree.mve)
+                shutil.rmtree(tree.mve, ignore_errors=True)
 
             # run mve makescene
             if not io.dir_exists(tree.mve_views):

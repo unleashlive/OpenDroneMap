@@ -16,7 +16,7 @@ def build(input_point_cloud_files, output_path, max_concurrency=8, rerun=False):
 
     if rerun and io.dir_exists(output_path):
         log.ODM_WARNING("Removing previous EPT directory: %s" % output_path)
-        shutil.rmtree(output_path)
+        shutil.rmtree(output_path, ignore_errors=True)
 
     kwargs = {
         'threads': max_concurrency,
@@ -39,4 +39,4 @@ def build(input_point_cloud_files, output_path, max_concurrency=8, rerun=False):
         
         
     if os.path.exists(tmpdir):
-        shutil.rmtree(tmpdir)
+        shutil.rmtree(tmpdir, ignore_errors=True)

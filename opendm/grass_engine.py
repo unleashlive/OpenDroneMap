@@ -124,7 +124,7 @@ class GrassContext:
 
     def cleanup(self):
         if os.path.exists(self.get_cwd()):
-            shutil.rmtree(self.get_cwd())
+            shutil.rmtree(self.get_cwd(), ignore_errors=True)
 
     def __del__(self):
         if self.auto_cleanup:

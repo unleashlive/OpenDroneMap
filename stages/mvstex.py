@@ -82,7 +82,7 @@ class ODMMvsTexStage(types.ODM_Stage):
                 # Make sure tmp directory is empty
                 if io.dir_exists(mvs_tmp_dir):
                     log.ODM_INFO("Removing old tmp directory {}".format(mvs_tmp_dir))
-                    shutil.rmtree(mvs_tmp_dir)
+                    shutil.rmtree(mvs_tmp_dir, ignore_errors=True)
 
                 # run texturing binary
                 system.run('{bin} "{nvm_file}" "{model}" "{out_dir}" '
