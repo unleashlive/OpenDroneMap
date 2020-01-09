@@ -66,6 +66,14 @@ def config():
                         nargs='?',
                         help='Name of Project (i.e subdirectory of projects folder)')
 
+    parser.add_argument('--images-s3key',
+                        metavar='<images s3path>',
+                        help='Path to images folder on S3 that will be imported')
+
+    parser.add_argument('--images-s3bucket',
+                        metavar='<images s3bucket>',
+                        help='S3 bucket to be used in conjuction with --images-s3key')
+
     parser.add_argument('--resize-to',
                         metavar='<integer>',
                         default=2048,

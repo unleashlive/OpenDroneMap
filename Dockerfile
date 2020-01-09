@@ -121,6 +121,7 @@ RUN rm -rf \
   /code/SuperBuild/src/pcl \
   /code/SuperBuild/src/pdal
 
+RUN pip install awscli
 #copy code files
 COPY zip_results.py /code/zip_results.py
 COPY convert_obj_three.py /code/convert_obj_three.py
