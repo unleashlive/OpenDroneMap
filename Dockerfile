@@ -79,7 +79,6 @@ COPY CMakeLists.txt /code/CMakeLists.txt
 COPY configure.sh /code/configure.sh
 COPY /modules/ /code/modules/
 COPY /opendm/ /code/opendm/
-COPY run.py /code/run.py
 COPY run.sh /code/run.sh
 COPY /stages/ /code/stages/
 COPY /SuperBuild/cmake/ /code/SuperBuild/cmake/
@@ -122,6 +121,7 @@ RUN rm -rf \
   /code/SuperBuild/src/pdal
 
 RUN pip install awscli
+COPY run.py /code/run.py
 #copy code files
 COPY zip_results.py /code/zip_results.py
 COPY convert_obj_three.py /code/convert_obj_three.py
