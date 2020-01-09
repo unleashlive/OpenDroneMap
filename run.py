@@ -39,8 +39,12 @@ if __name__ == '__main__':
     # s3_sync.aws_cli('s3', 'sync', 's3://pylot/ap-southeast-2:50fdfd90-6d7a-4c26-8230-66f82ff9df9a/GDRIVE-IMPORT/session-1576423143387/modelling-1578586907227/code/images/', '/project/unleash_model/images')
     s3_key = args.images_s3key
     s3_bucket = args.images_s3bucket
-    log.ODM_INFO("IMPORTING FILES FROM s3://{%s}/{%s}/" % (s3_bucket, s3_key))
-    s3_sync.aws_cli('s3', 'sync', 's3://{%s}/{%s}/' % (s3_bucket, s3_key), args.project_path + '/images')
+    images_dest = os.path.join(args.project_path, 'images')
+
+    log.ODM_INFO("IMPORTING IMAGES")
+    log.ODM_INFO("FROM: s3://%s/%s/" % (s3_bucket, s3_key))
+    log.ODM_INFO("TO: %s" % images_dest)
+    s3_sync.aws_cli(['s3', 'sync', 's3://%s/%s/' % (s3_bucket, s3_key), images_dest])
     # If user asks to rerun everything, delete all of the existing progress directories.
     if args.rerun_all:
         log.ODM_INFO("Rerun all -- Removing old data")
