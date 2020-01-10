@@ -77,11 +77,10 @@ def cleanTextures(project_path):
 
 
 def tif2tiles(project_path):
-    inputOrthoFile = project_path + "/odm_orthophoto/odm_orthophoto.tif"
-    outputOrthoTilesFolder = project_path + "/odm_orthophoto/tiles/"
-    os.system('gdal2tiles_parallel.py -e -p geodetic -n' + inputOrthoFile + ' ' + outputOrthoTilesFolder)
-    # os.system('gdal2tiles_parallel.py -e -p geodetic ./odm_orthophoto.tif ./tiles/')
-    os.system('gdal2tiles.py -z 10-22 -n ' + inputOrthoFile + ' ' + outputOrthoTilesFolder)
+    input_ortho_file = os.path.join(project_path, "/odm_orthophoto/odm_orthophoto.tif")
+    output_ortho_tiles_folder = os.path.join(project_path, "/odm_orthophoto/tiles/")
+    # os.system('gdal2tiles_parallel.py -e -p geodetic -n' + input_ortho_file + ' ' + output_ortho_tiles_folder)
+    os.system('gdal2tiles.py -z 10-22 -n ' + input_ortho_file + ' ' + output_ortho_tiles_folder)
 
 
 def calculate_mean_recon_error(reconstruction_json):
