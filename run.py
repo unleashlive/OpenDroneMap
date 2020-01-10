@@ -40,11 +40,14 @@ if __name__ == '__main__':
     s3_key = args.images_s3key
     s3_bucket = args.images_s3bucket
     images_dest = os.path.join(args.project_path, 'images')
+    if not s3_key.endswith('/'):
+        s3_key += '/'
 
     log.ODM_INFO("IMPORTING IMAGES")
     log.ODM_INFO("FROM: s3://%s/%s/" % (s3_bucket, s3_key))
     log.ODM_INFO("TO: %s" % images_dest)
-    s3_sync.aws_cli(['s3', 'sync', 's3://%s/%s/' % (s3_bucket, s3_key), images_dest])
+
+    s3_sync.aws_cli(['s3', 'sync', 's3://%s/%s' % (s3_bucket, s3_key), images_dest])
     # If user asks to rerun everything, delete all of the existing progress directories.
     if args.rerun_all:
         log.ODM_INFO("Rerun all -- Removing old data")
