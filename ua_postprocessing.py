@@ -9,9 +9,9 @@ import s3_sync
 # this prepares syncing project folder to S3
 def clean_project(project_path):
     objects_to_clean = [
-        os.path.join(project_path, '/odm_orthophoto/odm_orthophoto.png'),
-        os.path.join(project_path, '/odm_orthophoto/odm_orthophoto.tif'),
-        os.path.join(project_path, '/odm_orthophoto/odm_orthophoto.original.tif')
+        project_path + '/odm_orthophoto/odm_orthophoto.png',
+        project_path + '/odm_orthophoto/odm_orthophoto.tif',
+        project_path + '/odm_orthophoto/odm_orthophoto.original.tif'
     ]
 
     for o in objects_to_clean:
@@ -77,8 +77,8 @@ def cleanTextures(project_path):
 
 
 def tif2tiles(project_path):
-    input_ortho_file = os.path.join(project_path, "/odm_orthophoto/odm_orthophoto.tif")
-    output_ortho_tiles_folder = os.path.join(project_path, "/odm_orthophoto/tiles/")
+    input_ortho_file = project_path + "/odm_orthophoto/odm_orthophoto.tif"
+    output_ortho_tiles_folder = project_path + "/odm_orthophoto/tiles/"
     # os.system('gdal2tiles_parallel.py -e -p geodetic -n' + input_ortho_file + ' ' + output_ortho_tiles_folder)
     os.system('gdal2tiles.py -z 10-22 -n ' + input_ortho_file + ' ' + output_ortho_tiles_folder)
 
