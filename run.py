@@ -96,7 +96,7 @@ if __name__ == '__main__':
     #                 args.project_path + "/odm_texturing"])
 
     ua_postprocessing.clean_project(args.project_path)
-    ua_postprocessing.upload_results(args.images_s3dstkey, args.images_s3dstbucket)
+    ua_postprocessing.upload_results(args.project_path, args.images_s3dstkey, args.images_s3dstbucket)
 
     # Do not show ASCII art for local submodels runs
     if not "submodels/submodel_" in args.project_path:
