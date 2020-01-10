@@ -126,6 +126,7 @@ COPY run.py /code/run.py
 COPY zip_results.py /code/zip_results.py
 COPY convert_obj_three.py /code/convert_obj_three.py
 COPY ua_postprocessing.py /code/ua_postprocessing.py
+COPY s3_sync.py /code/s3_sync.py
 COPY gdal2tiles_parallel.py /usr/bin/gdal2tiles_parallel.py
 
 # Entry point
