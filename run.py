@@ -71,20 +71,22 @@ if __name__ == '__main__':
 
     # UA POSTPROCESSING CUSTOM CODE
 
-    # CONVERT OBJ TO JS FOR THREEJS
-    ua_postprocessing.obj2gltf(args.project_path)
-
-    # RESIZE 3D MODEL TEXTURES - UNG-134
-    ua_postprocessing.resize_textures(args.project_path)
-
-    # CONVERT OBJ TO GLB FOR THREEJS
-    ua_postprocessing.obj2glb(args.project_path)
-
-    # CLEAN REDUNDANT TEXTURES
-    # ua_postprocessing.cleanTextures(args.project_path)
-
     # CREATE TMS TILES FOR ORTHOPHOTO
     ua_postprocessing.tif2tiles(args.project_path)
+
+    # SKIP 3D POSTPROCESSING IF FAST ORTHOPHOTO
+    if not args.fast_orthophoto:
+        # CONVERT OBJ TO JS FOR THREEJS
+        ua_postprocessing.obj2gltf(args.project_path)
+
+        # RESIZE 3D MODEL TEXTURES - UNG-134
+        ua_postprocessing.resize_textures(args.project_path)
+
+        # CONVERT OBJ TO GLB FOR THREEJS
+        ua_postprocessing.obj2glb(args.project_path)
+
+        # CLEAN REDUNDANT TEXTURES
+        # ua_postprocessing.cleanTextures(args.project_path)
 
     # ZIP RESULTS
     # zip_results.zip_dirs([args.project_path + "/odm_georeferencing",
