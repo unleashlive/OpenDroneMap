@@ -39,15 +39,15 @@ if __name__ == '__main__':
     # s3_sync.aws_cli('s3', 'sync', 's3://pylot/ap-southeast-2:50fdfd90-6d7a-4c26-8230-66f82ff9df9a/GDRIVE-IMPORT/session-1576423143387/modelling-1578586907227/code/images/', '/project/unleash_model/images')
     s3_key = args.images_s3key
     s3_bucket = args.images_s3bucket
-    images_dest = os.path.join(args.project_path, 'images')
+    images_local_path = os.path.join(args.project_path, 'images')
     if not s3_key.endswith('/'):
         s3_key += '/'
 
     log.ODM_INFO("IMPORTING IMAGES")
     log.ODM_INFO("FROM: s3://%s/%s/" % (s3_bucket, s3_key))
-    log.ODM_INFO("TO: %s" % images_dest)
+    log.ODM_INFO("TO: %s" % images_local_path)
 
-    s3_sync.aws_cli(['s3', 'sync', 's3://%s/%s' % (s3_bucket, s3_key), images_dest])
+    s3_sync.aws_cli(['s3', 'sync', 's3://%s/%s' % (s3_bucket, s3_key), images_local_path])
     # If user asks to rerun everything, delete all of the existing progress directories.
     if args.rerun_all:
         log.ODM_INFO("Rerun all -- Removing old data")
@@ -94,6 +94,9 @@ if __name__ == '__main__':
     #                 args.project_path + "/odm_orthophoto",
     #                 args.project_path + "/odm_dem",
     #                 args.project_path + "/odm_texturing"])
+
+    ua_postprocessing.clean_project(args.project_path)
+    ua_postprocessing.upload_results(args.images_s3dstkey, args.images_s3dstbucket)
 
     # Do not show ASCII art for local submodels runs
     if not "submodels/submodel_" in args.project_path:

@@ -2,6 +2,29 @@ import os
 import json
 import numpy as np
 
+import s3_sync
+
+
+# clean unnecessary heavy files
+# this prepares syncing project folder to S3
+def clean_project(project_path):
+    objects_to_clean = [
+        os.path.join(project_path, '/odm_orthophoto/odm_orthophoto.png'),
+        os.path.join(project_path, '/odm_orthophoto/odm_orthophoto.tif'),
+        os.path.join(project_path, '/odm_orthophoto/odm_orthophoto.original.tif')
+    ]
+
+    for o in objects_to_clean:
+        try:
+            os.remove(o)
+        except:
+            print('Failed to delete ' + o)
+            pass
+
+
+def upload_results(project_folder, images_s3dstkey, images_s3dstbucket):
+    s3_sync.aws_cli(['s3', 'sync', project_folder, 's3://%s/%s' % (images_s3dstbucket, images_s3dstkey)])
+
 
 def resize_textures(project_path):
     odm_texturing_folder = project_path + "/odm_texturing/"
@@ -56,10 +79,9 @@ def cleanTextures(project_path):
 def tif2tiles(project_path):
     inputOrthoFile = project_path + "/odm_orthophoto/odm_orthophoto.tif"
     outputOrthoTilesFolder = project_path + "/odm_orthophoto/tiles/"
-    os.system('cp -v ' + inputOrthoFile + ' ./odm_orthophoto.tif')
+    os.system('gdal2tiles_parallel.py -e -p geodetic -n' + inputOrthoFile + ' ' + outputOrthoTilesFolder)
     # os.system('gdal2tiles_parallel.py -e -p geodetic ./odm_orthophoto.tif ./tiles/')
-    os.system('gdal2tiles.py -z 10-22 -n ./odm_orthophoto.tif ./tiles/')
-    os.system('mkdir -p ' + outputOrthoTilesFolder + ' && cp -r ./tiles/* ' + outputOrthoTilesFolder)
+    os.system('gdal2tiles.py -z 10-22 -n ' + inputOrthoFile + ' ' + outputOrthoTilesFolder)
 
 
 def calculate_mean_recon_error(reconstruction_json):
