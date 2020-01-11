@@ -7,7 +7,7 @@ from opendm import io
 from opendm.progress import progressbc
 # import zip_results
 import ua_postprocessing
-import s3_sync
+import awscli_util
 import os
 from pipes import quote
 from stages.odm_app import ODMApp
@@ -47,7 +47,7 @@ if __name__ == '__main__':
     log.ODM_INFO("FROM: s3://%s/%s/" % (s3_bucket, s3_key))
     log.ODM_INFO("TO: %s" % images_local_path)
 
-    s3_sync.aws_cli(['s3', 'sync', 's3://%s/%s' % (s3_bucket, s3_key), images_local_path])
+    awscli_util.aws_cli(['s3', 'sync', '--quiet', 's3://%s/%s' % (s3_bucket, s3_key), images_local_path])
     # If user asks to rerun everything, delete all of the existing progress directories.
     if args.rerun_all:
         log.ODM_INFO("Rerun all -- Removing old data")

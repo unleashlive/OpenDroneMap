@@ -2,7 +2,7 @@ import os
 import json
 import numpy as np
 
-import s3_sync
+import awscli_util
 
 
 # clean unnecessary heavy files
@@ -23,7 +23,7 @@ def clean_project(project_path):
 
 
 def upload_results(project_folder, images_s3dstkey, images_s3dstbucket):
-    s3_sync.aws_cli(['s3', 'sync', project_folder, 's3://%s/%s' % (images_s3dstbucket, images_s3dstkey)])
+    awscli_util.aws_cli(['s3', 'sync', '--quiet', project_folder, 's3://%s/%s' % (images_s3dstbucket, images_s3dstkey)])
 
 
 def resize_textures(project_path):
