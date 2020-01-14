@@ -59,7 +59,6 @@ RUN apt-get update -y \
   libssl-dev \
   && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get remove -y libdc1394-22-dev
 RUN pip install --upgrade pip
 RUN pip install setuptools awscli
 
