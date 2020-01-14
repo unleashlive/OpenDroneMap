@@ -23,7 +23,7 @@ def clean_project(project_path):
 
 
 def upload_results(project_folder, images_dst_s3key):
-    awscli_util.aws_cli(['s3', 'sync', '--quiet', project_folder, 's3://%s' % (images_dst_s3key)])
+    awscli_util.aws_cli(['s3', 'sync', '--quiet', project_folder, images_dst_s3key])
 
 
 def resize_textures(project_path):

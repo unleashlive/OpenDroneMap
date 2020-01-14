@@ -43,10 +43,10 @@ if __name__ == '__main__':
         src_s3_key += '/'
 
     log.ODM_INFO("IMPORTING IMAGES")
-    log.ODM_INFO("FROM: s3://%s" % src_s3_key)
+    log.ODM_INFO("FROM: %s" % src_s3_key)
     log.ODM_INFO("TO: %s" % images_local_path)
 
-    awscli_util.aws_cli(['s3', 'sync', '--quiet', 's3://%s' % src_s3_key, images_local_path])
+    awscli_util.aws_cli(['s3', 'sync', '--quiet', src_s3_key, images_local_path])
     # If user asks to rerun everything, delete all of the existing progress directories.
     if args.rerun_all:
         log.ODM_INFO("Rerun all -- Removing old data")
