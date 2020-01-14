@@ -3,6 +3,8 @@ FROM phusion/baseimage
 # Env variables
 ENV DEBIAN_FRONTEND noninteractive
 
+#prepare node installation
+RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
 #RUN add-apt-repository ppa:nextgis/ppa
 #Install dependencies and required requisites
 RUN apt-get update -y \
@@ -62,8 +64,6 @@ RUN apt-get update -y \
 RUN pip install --upgrade pip
 RUN pip install setuptools
 
-#prepare node installation
-RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
 #install obj2gltf
 RUN npm -g install github:AnalyticalGraphicsInc/obj2gltf.git
 
