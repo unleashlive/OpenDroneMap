@@ -6,17 +6,12 @@ ENV DEBIAN_FRONTEND noninteractive
 #RUN add-apt-repository ppa:nextgis/ppa
 #Install dependencies and required requisites
 RUN apt-get update -y \
-  && apt-get install -y \
+  && apt-get install --no-install-recommends -y \
     software-properties-common \
   && add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable \
   && add-apt-repository -y ppa:george-edison55/cmake-3.x \
-  && apt-get update -y
-
-#prepare node installation
-RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
-
-# All packages (Will install much faster)
-RUN apt-get install --no-install-recommends -y \
+  && apt-get update -y \
+  && apt-get install --no-install-recommends -y \
   build-essential \
   cmake \
   gdal-bin \
@@ -61,12 +56,15 @@ RUN apt-get install --no-install-recommends -y \
   nodejs \
   imagemagick \
   grass-core \
-  libssl-dev
+  libssl-dev \
+  && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get remove libdc1394-22-dev
+RUN apt-get remove -y libdc1394-22-dev
 RUN pip install --upgrade pip
-RUN pip install setuptools
+RUN pip install setuptools awscli
 
+#prepare node installation
+RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
 #install obj2gltf
 RUN npm -g install github:AnalyticalGraphicsInc/obj2gltf.git
 
@@ -119,7 +117,6 @@ RUN rm -rf \
   /code/SuperBuild/src/pcl \
   /code/SuperBuild/src/pdal
 
-RUN pip install awscli
 COPY /opendm/ /code/opendm/
 COPY run.py /code/run.py
 #copy code files
