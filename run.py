@@ -37,7 +37,7 @@ if __name__ == '__main__':
         system.mkdir_p(os.path.abspath(args.project_path))
 
     # s3_sync.aws_cli('s3', 'sync', 's3://pylot/ap-southeast-2:50fdfd90-6d7a-4c26-8230-66f82ff9df9a/GDRIVE-IMPORT/session-1576423143387/modelling-1578586907227/code/images/', '/project/unleash_model/images')
-    src_s3_key = args.images_src_s3key
+    src_s3_key = args.input_s3key
     images_local_path = os.path.join(args.project_path, 'images')
     if not src_s3_key.endswith('/'):
         src_s3_key += '/'
@@ -95,7 +95,7 @@ if __name__ == '__main__':
     #                 args.project_path + "/odm_texturing"])
 
     ua_postprocessing.clean_project(args.project_path)
-    ua_postprocessing.upload_results(args.project_path, args.images_dst_s3key)
+    ua_postprocessing.upload_results(args.project_path, args.output_s3key)
 
     # Do not show ASCII art for local submodels runs
     if not "submodels/submodel_" in args.project_path:
