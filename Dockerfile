@@ -59,7 +59,8 @@ RUN apt-get update -y \
   libssl-dev \
   && rm -rf /var/lib/apt/lists/*
 
-RUN pip install --upgrade pip && pip install setuptools && pip install awscli
+RUN pip install --upgrade pip
+RUN pip install setuptools
 
 #prepare node installation
 RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
