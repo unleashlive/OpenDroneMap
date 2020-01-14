@@ -100,13 +100,8 @@ RUN cd SuperBuild \
   && mkdir build \
   && cd build \
   && cmake .. \
-  && make -j$(nproc)
-
-# Cleanup APT
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* 
-
-# Clean Superbuild
-RUN rm -rf \
+  && make -j$(nproc) \
+  && rm -rf \
   /code/SuperBuild/build/opencv \
   /code/SuperBuild/download \
   /code/SuperBuild/src/ceres \
@@ -114,16 +109,19 @@ RUN rm -rf \
   /code/SuperBuild/src/opencv \
   /code/SuperBuild/src/opengv \
   /code/SuperBuild/src/pcl \
-  /code/SuperBuild/src/pdal
+  /code/SuperBuild/src/pdal \
+  && ( find . -type d -name ".git" ) | xargs rm -rf
+
+
+# Cleanup APT
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 COPY /opendm/ /code/opendm/
 COPY run.py /code/run.py
 #copy code files
-COPY zip_results.py /code/zip_results.py
-COPY convert_obj_three.py /code/convert_obj_three.py
+#COPY zip_results.py /code/zip_results.py
 COPY ua_postprocessing.py /code/ua_postprocessing.py
 COPY awscli_util.py /code/awscli_util.py
-COPY gdal2tiles_parallel.py /usr/bin/gdal2tiles_parallel.py
 
 # Entry point
 ENTRYPOINT ["python", "/code/run.py"]
