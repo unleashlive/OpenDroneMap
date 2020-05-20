@@ -9,11 +9,14 @@ import awscli_util
 # this prepares syncing project folder to S3
 def clean_project(project_path):
     objects_to_clean = [
+        # project_path + '/odm_orthophoto/odm_orthophoto.tif',
         project_path + '/odm_orthophoto/odm_orthophoto.png',
-        project_path + '/odm_orthophoto/odm_orthophoto.tif',
-        project_path + '/odm_orthophoto/odm_orthophoto.original.tif'
+        project_path + '/odm_orthophoto/odm_orthophoto.original.tif',
+        project_path + '/odm_texturing_25d/',
+        project_path + '/opensfm/',
+        project_path + '/odm_filterpoints/',
+        project_path + '/mve/'
     ]
-
     for o in objects_to_clean:
         try:
             os.remove(o)
