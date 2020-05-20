@@ -1,4 +1,4 @@
-FROM phusion/baseimage
+FROM phusion/baseimage as base
 
 # Env variables
 ENV DEBIAN_FRONTEND noninteractive
@@ -7,10 +7,7 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
 #RUN add-apt-repository ppa:nextgis/ppa
 #Install dependencies and required requisites
-RUN apt-get update -y \
-  && apt-get install --no-install-recommends -y \
-    software-properties-common \
-  && add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable \
+RUN add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable \
   && add-apt-repository -y ppa:george-edison55/cmake-3.x \
   && apt-get update -y \
   && apt-get install --no-install-recommends -y \
@@ -54,21 +51,21 @@ RUN apt-get update -y \
   python-pip \
   python-software-properties \
   python-wheel \
+  software-properties-common \
   swig2.0 \
   nodejs \
   imagemagick \
   grass-core \
   libssl-dev \
-  && rm -rf /var/lib/apt/lists/*
+  && apt-get remove libdc1394-22-dev \
+  && pip install --upgrade pip \
+  && pip install setuptools
 
-RUN pip install --upgrade pip
-RUN pip install setuptools
 
 #install obj2gltf
 RUN npm -g install github:AnalyticalGraphicsInc/obj2gltf.git
 
 # Prepare directories
-RUN mkdir /code
 WORKDIR /code
 
 # Copy repository files
@@ -84,14 +81,14 @@ COPY VERSION /code/VERSION
 COPY requirements.txt /code/requirements.txt
 
 RUN pip install -r requirements.txt
-RUN pip install --upgrade cryptography && python -m easy_install --upgrade pyOpenSSL
 
 ENV PYTHONPATH="$PYTHONPATH:/code/SuperBuild/install/lib/python2.7/dist-packages"
 ENV PYTHONPATH="$PYTHONPATH:/code/SuperBuild/src/opensfm"
 ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/code/SuperBuild/install/lib"
 
 # Compile code in SuperBuild and root directories
-RUN cd SuperBuild \
+RUN rm -fr docker \
+  && cd SuperBuild \
   && mkdir build \
   && cd build \
   && cmake .. \
@@ -100,8 +97,14 @@ RUN cd SuperBuild \
   && mkdir build \
   && cd build \
   && cmake .. \
-  && make -j$(nproc) \
-  && rm -rf \
+  && make -j$(nproc)
+
+# Cleanup APT
+RUN apt-get clean \
+  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Clean Superbuild
+RUN rm -rf \
   /code/SuperBuild/build/opencv \
   /code/SuperBuild/download \
   /code/SuperBuild/src/ceres \
@@ -125,4 +128,3 @@ COPY awscli_util.py /code/awscli_util.py
 
 # Entry point
 ENTRYPOINT ["python", "/code/run.py"]
-

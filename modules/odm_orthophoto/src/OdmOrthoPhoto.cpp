@@ -246,7 +246,9 @@ void OdmOrthoPhoto::saveTIFF(const std::string &filename, GDALDataType dataType)
     }
 
     // Alpha
-    if (dataType == GDT_UInt16){
+    if (dataType == GDT_Float32){
+        finalizeAlphaBand<float>();
+    }else if (dataType == GDT_UInt16){
         finalizeAlphaBand<uint16_t>();
     }else if (dataType == GDT_Byte){
         finalizeAlphaBand<uint8_t>();
@@ -276,7 +278,7 @@ inline T maxRange(){
 
 template <typename T>
 void OdmOrthoPhoto::initBands(int count){
-    size_t pixelCount = static_cast<size_t>(width * height);
+    size_t pixelCount = static_cast<size_t>(width) * static_cast<size_t>(height);
 
     // Channels
     for (int i = 0; i < count; i++){
@@ -290,7 +292,7 @@ void OdmOrthoPhoto::initBands(int count){
 
 template <typename T>
 void OdmOrthoPhoto::initAlphaBand(){
-     size_t pixelCount = static_cast<size_t>(width * height);
+     size_t pixelCount = static_cast<size_t>(width) * static_cast<size_t>(height);
      // Alpha
      if (alphaBand == nullptr){
          T *arr = new T[pixelCount];
@@ -306,7 +308,7 @@ void OdmOrthoPhoto::finalizeAlphaBand(){
      // Adjust alpha band values, only pixels that have
      // values on all bands should be visible
 
-     size_t pixelCount = static_cast<size_t>(width * height);
+     size_t pixelCount = static_cast<size_t>(width) * static_cast<size_t>(height);
      int channels = bands.size();
 
      T *arr = reinterpret_cast<T *>(alphaBand);
@@ -504,6 +506,10 @@ void OdmOrthoPhoto::createOrthoPhoto()
                         log_ << "Texture depth: 16bit\n";
                         initBands<uint16_t>(texture.channels());
                         if (primary) initAlphaBand<uint16_t>();
+                    }else if (textureDepth == CV_32F){
+                        log_ << "Texture depth: 32bit (float)\n";
+                        initBands<float>(texture.channels());
+                        if (primary) initAlphaBand<float>();
                     }else{
                         std::cerr << "Unsupported bit depth value: " << textureDepth;
                         exit(1);
@@ -537,6 +543,8 @@ void OdmOrthoPhoto::createOrthoPhoto()
                     drawTexturedTriangle<uint8_t>(texture, polygon, meshCloud, uvs, faceIndex+faceOff);
                 }else if (textureDepth == CV_16U){
                     drawTexturedTriangle<uint16_t>(texture, polygon, meshCloud, uvs, faceIndex+faceOff);
+                }else if (textureDepth == CV_32F){
+                    drawTexturedTriangle<float>(texture, polygon, meshCloud, uvs, faceIndex+faceOff);
                 }
             }
             faceOff += faces.size();
@@ -555,6 +563,8 @@ void OdmOrthoPhoto::createOrthoPhoto()
         saveTIFF(outputFile_, GDT_Byte);
     }else if (textureDepth == CV_16U){
         saveTIFF(outputFile_, GDT_UInt16);
+    }else if (textureDepth == CV_32F){
+        saveTIFF(outputFile_, GDT_Float32);
     }else{
         std::cerr << "Unsupported bit depth value: " << textureDepth;
         exit(1);
@@ -925,7 +935,7 @@ void OdmOrthoPhoto::renderPixel(int row, int col, float s, float t, const cv::Ma
     top = static_cast<int>(topF);
     
     // The interpolated color values.
-    size_t idx = static_cast<size_t>(row * width + col);
+    size_t idx = static_cast<size_t>(row) * static_cast<size_t>(width) + static_cast<size_t>(col);
     T *data = reinterpret_cast<T *>(texture.data); // Faster access
     int numChannels = texture.channels();
 

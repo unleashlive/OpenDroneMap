@@ -1,5 +1,7 @@
 import sys
 import os
+import shutil
+import glob
 
 from opendm import log
 from opendm import io
@@ -9,6 +11,7 @@ from opendm import gsd
 from opendm import point_cloud
 from opendm import types
 from opendm.osfm import OSFMContext
+from opendm import multispectral
 
 class ODMOpenSfMStage(types.ODM_Stage):
     def process(self, args, outputs):
@@ -29,6 +32,12 @@ class ODMOpenSfMStage(types.ODM_Stage):
         octx.reconstruct(self.rerun())
         octx.extract_cameras(tree.path("cameras.json"), self.rerun())
         self.update_progress(70)
+
+        if args.optimize_disk_space:
+            shutil.rmtree(octx.path("features"))
+            shutil.rmtree(octx.path("matches"))
+            shutil.rmtree(octx.path("exif"))
+            shutil.rmtree(octx.path("reports"))
 
         # If we find a special flag file for split/merge we stop right here
         if os.path.exists(octx.path("split_merge_stop_at_reconstruction.txt")):
@@ -57,12 +66,14 @@ class ODMOpenSfMStage(types.ODM_Stage):
             octx.touch(updated_config_flag_file)
 
         # These will be used for texturing / MVS
-        undistorted_images_path = octx.path("undistorted", "images")
-
-        if not io.dir_exists(undistorted_images_path) or self.rerun():
-            octx.run('undistort')
+        if args.radiometric_calibration == "none":
+            octx.convert_and_undistort(self.rerun())
         else:
-            log.ODM_WARNING("Found an undistorted directory in %s" % undistorted_images_path)
+            def radiometric_calibrate(shot_id, image):
+                photo = reconstruction.get_photo(shot_id)
+                return multispectral.dn_to_reflectance(photo, image, use_sun_sensor=args.radiometric_calibration=="camera+sun")
+
+            octx.convert_and_undistort(self.rerun(), radiometric_calibrate)
 
         self.update_progress(80)
 
@@ -115,3 +126,12 @@ class ODMOpenSfMStage(types.ODM_Stage):
             octx.run('export_geocoords --transformation --proj \'%s\'' % reconstruction.georef.proj4())
         else:
             log.ODM_WARNING("Will skip exporting %s" % tree.opensfm_transformation)
+
+        if args.optimize_disk_space:
+            os.remove(octx.path("tracks.csv"))
+            os.remove(octx.path("undistorted", "tracks.csv"))
+            os.remove(octx.path("undistorted", "reconstruction.json"))
+            if io.dir_exists(octx.path("undistorted", "depthmaps")):
+                files = glob.glob(octx.path("undistorted", "depthmaps", "*.npz"))
+                for f in files:
+                    os.remove(f)

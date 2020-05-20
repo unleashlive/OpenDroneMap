@@ -1,6 +1,4 @@
 Dockerfile
-tests/*
-img/*
 SuperBuild/build
 SuperBuild/download
 SuperBuild/install
@@ -13,5 +11,15 @@ odm_meshing
 odm_georeferencing
 images_resize
 .git
-contrib/blender/photo_vr.blend
-contrib/blender/photo_360.blend
+
+/contrib
+/docs
+/hooks
+/img
+/license
+/tests
+tests.sh
+settings.yml
+code_of_conduct.md
+configure_18_04.sh
+index.html
