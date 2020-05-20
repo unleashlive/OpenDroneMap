@@ -124,6 +124,8 @@ COPY run.py /code/run.py
 #COPY zip_results.py /code/zip_results.py
 COPY ua_postprocessing.py /code/ua_postprocessing.py
 COPY awscli_util.py /code/awscli_util.py
+#todo move earlier
+COPY settings.yaml /code/settings.yaml
 
 # Entry point
 ENTRYPOINT ["python", "/code/run.py"]
