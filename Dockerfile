@@ -76,7 +76,6 @@ COPY run.sh /code/run.sh
 COPY /stages/ /code/stages/
 COPY /SuperBuild/cmake/ /code/SuperBuild/cmake/
 COPY /SuperBuild/CMakeLists.txt /code/SuperBuild/CMakeLists.txt
-COPY docker.settings.yaml /code/settings.yaml
 COPY VERSION /code/VERSION
 COPY requirements.txt /code/requirements.txt
 
