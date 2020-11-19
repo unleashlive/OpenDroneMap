@@ -85,19 +85,6 @@ def tif2tiles(project_path):
     # os.system('gdal2tiles_parallel.py -e -p geodetic -n' + input_ortho_file + ' ' + output_ortho_tiles_folder)
     os.system('gdal2tiles.py -z 10-22 -n ' + input_ortho_file + ' ' + output_ortho_tiles_folder)
 
-gdal2tiles.py -z 10-22 -n JL103B_MSS_20201017214440_200032517_101_0300_001_L1A_MSS_ORTHO_MS.tif odm_orthophoto/tiles/
-gdal2tiles.py -z 10-22 -n JL103B_MSS_20200928212048_200031609_101_0260_001_L1A_MSS_ENH.tif
-gdal2tiles.py -z 10-22 -n JL103B_MSS_20200928212048_200031609_101_0260_001_L1A_MSS.tif
-gdal2tiles.py -z 10-22 -n JL103B_MSS_20200928212048.TIF
-aws s3 cp odm_orthophoto_corners.txt s3://pylot/ap-southeast-2:b9be243f-1c1e-4d92-8a72-2cf5fe1dc5a5/W16304549363f348/session-1603984683704/modelling-1603984683704/code/odm_orthophoto/odm_orthophoto_corners.txt
-aws s3 cp coords.txt s3://pylot/ap-southeast-2:b9be243f-1c1e-4d92-8a72-2cf5fe1dc5a5/W16304549363f348/session-1603984683704/modelling-1603984683704/code/odm_georeferencing/coords.txt
-gdal2tiles.py -z 10-22 -n JL103B_MSS_20200928212048_200031609_101_0893_001_L1A_MSS_GEOREF.tif 0893/odm_orthophoto/tiles/
-gdal2tiles.py -z 10-22 -n JL103B_MSS_20200928212048_200031609_101_0534_001_L1A_MSS_GEOREF.tif 0534/odm_orthophoto/tiles/
-gdal2tiles.py -z 10-22 -n JL103B_MSS_20200928212048_200031609_101_0382_001_L1A_MSS_GEOREF.tif 0382/odm_orthophoto/tiles/
-gdal2tiles.py -z 10-22 -n JL103B_MSS_20200928212048_200031609_101_0379_001_L1A_MSS_GEOREF.tif 0379/odm_orthophoto/tiles/
-gdal2tiles.py -z 10-22 -n JL103B_MSS_20200928212048_200031609_101_0375_001_L1A_MSS_GEOREF.tif 0375/odm_orthophoto/tiles/
-gdal2tiles.py -z 10-18 -n JL103B_MSS_20200928212048_200031609_101_0359_001_L1A_MSStransparent_out.tiff odm_orthophoto/tiles/
-
 def calculate_mean_recon_error(reconstruction_json):
     """
     Computes the average error rate of an OpenSfM reconstruction.
