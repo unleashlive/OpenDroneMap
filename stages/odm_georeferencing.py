@@ -120,15 +120,24 @@ class ODMGeoreferencingStage(types.ODM_Stage):
                         log.ODM_INFO("Calculating cropping area and generating bounds shapefile from point cloud")
                         cropper = Cropper(tree.odm_georeferencing, 'odm_georeferenced_model')
                         
-                        decimation_step = 40 if args.fast_orthophoto or args.use_opensfm_dense else 90
+                        if args.fast_orthophoto:
+                            decimation_step = 10
+                        elif args.use_opensfm_dense:
+                            decimation_step = 40
+                        else:
+                            decimation_step = 90
                         
                         # More aggressive decimation for large datasets
                         if not args.fast_orthophoto:
                             decimation_step *= int(len(reconstruction.photos) / 1000) + 1
 
-                        cropper.create_bounds_gpkg(tree.odm_georeferencing_model_laz, args.crop, 
-                                                    decimation_step=decimation_step)
-
+                        try:
+                            cropper.create_bounds_gpkg(tree.odm_georeferencing_model_laz, args.crop, 
+                                                        decimation_step=decimation_step)
+                        except:
+                            log.ODM_WARNING("Cannot calculate crop bounds! We will skip cropping")
+                            args.crop = 0
+                            
                     # Do not execute a second time, since
                     # We might be doing georeferencing for
                     # multiple models (3D, 2.5D, ...)

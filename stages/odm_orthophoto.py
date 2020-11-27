@@ -148,7 +148,7 @@ class ODMOrthoPhotoStage(types.ODM_Stage):
                                            os.path.join(tree.odm_orthophoto, "odm_orthophoto_cut.tif"),
                                            blend_distance=20, only_max_coords_feature=True)
 
-                orthophoto.post_orthophoto_steps(args, bounds_file_path, tree.odm_orthophoto_tif)
+                orthophoto.post_orthophoto_steps(args, bounds_file_path, tree.odm_orthophoto_tif, tree.orthophoto_tiles)
 
                 # Generate feathered orthophoto also
                 if args.orthophoto_cutline:
@@ -160,8 +160,7 @@ class ODMOrthoPhotoStage(types.ODM_Stage):
                 geotiffcreated = True
             if not geotiffcreated:
                 if io.file_exists(tree.odm_orthophoto_render):
-                    # 0.1 is arbitrary
-                    pseudogeo.add_pseudo_georeferencing(tree.odm_orthophoto_render, 0.1)
+                    pseudogeo.add_pseudo_georeferencing(tree.odm_orthophoto_render)
                     log.ODM_INFO("Renaming %s --> %s" % (tree.odm_orthophoto_render, tree.odm_orthophoto_tif))
                     os.rename(tree.odm_orthophoto_render, tree.odm_orthophoto_tif)
                 else:
