@@ -76,8 +76,7 @@ RUN add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable \
   imagemagick \
   gdal-bin \
   git \
-  libgdal-dev \
-  python-gdal
+  libgdal-dev
 
 #install obj2gltf
 RUN npm -g install github:AnalyticalGraphicsInc/obj2gltf.git
