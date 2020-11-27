@@ -51,16 +51,16 @@ class Cropper:
             run('gdalwarp -cutline {gpkg_path} '
                 '-crop_to_cutline '
                 '{options} '
-                '"{warpOptions}" '
-                '"{geotiffInput}" '
-                '"{geotiffOutput}" '
+                '{warpOptions} '
+                '{geotiffInput} '
+                '{geotiffOutput} '
                 '--config GDAL_CACHEMAX {max_memory}%'.format(**kwargs))
 
             if not keep_original:
                 os.remove(original_geotiff)
 
         except Exception as e:
-            log.ODM_WARNING('Something went wrong while cropping: {}'.format(e.message))
+            log.ODM_WARNING('Something went wrong while cropping: {}'.format(e))
             
             # Revert rename
             os.rename(original_geotiff, geotiff_path)
@@ -147,7 +147,7 @@ class Cropper:
 
         boundary_file_path = self.path('boundary.json')
 
-        run('pdal info --boundary --filters.hexbin.edge_size=1 --filters.hexbin.threshold=0 "{0}" > "{1}"'.format(decimated_pointcloud_path,  boundary_file_path))
+        run('pdal info --boundary --filters.hexbin.edge_size=1 --filters.hexbin.threshold=0 {0} > {1}'.format(decimated_pointcloud_path,  boundary_file_path))
         
         pc_geojson_boundary_feature = None
 
@@ -189,8 +189,14 @@ class Cropper:
         BUFFER_SMOOTH_DISTANCE = 3
 
         if buffer_distance > 0:
-            convexhull = convexhull.Buffer(-(buffer_distance + BUFFER_SMOOTH_DISTANCE))
-            convexhull = convexhull.Buffer(BUFFER_SMOOTH_DISTANCE)
+            # For small areas, check that buffering doesn't obliterate 
+            # our hull
+            tmp = convexhull.Buffer(-(buffer_distance + BUFFER_SMOOTH_DISTANCE))
+            tmp = tmp.Buffer(BUFFER_SMOOTH_DISTANCE)
+            if tmp.Area() > 0:
+                convexhull = tmp
+            else:
+                log.ODM_WARNING("Very small crop area detected, we will not smooth it.")
 
         # Save to a new file
         bounds_geojson_path = self.path('bounds.geojson')
@@ -230,7 +236,7 @@ class Cropper:
         bounds_geojson_path = self.create_bounds_geojson(pointcloud_path, buffer_distance, decimation_step)
 
         summary_file_path = os.path.join(self.storage_dir, '{}.summary.json'.format(self.files_prefix))
-        run('pdal info --summary "{0}" > "{1}"'.format(pointcloud_path, summary_file_path))
+        run('pdal info --summary {0} > {1}'.format(pointcloud_path, summary_file_path))
         
         pc_proj4 = None
         with open(summary_file_path, 'r') as f:
@@ -248,7 +254,7 @@ class Cropper:
             'proj4': pc_proj4
         }
 
-        run('ogr2ogr -overwrite -f GPKG -a_srs "{proj4}" "{output}" "{input}"'.format(**kwargs))
+        run('ogr2ogr -overwrite -f GPKG -a_srs "{proj4}" {output} {input}'.format(**kwargs))
 
         return bounds_gpkg_path
 

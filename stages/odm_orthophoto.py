@@ -30,7 +30,7 @@ class ODMOrthoPhotoStage(types.ODM_Stage):
                 ignore_resolution = True
 
             resolution = 1.0 / (gsd.cap_resolution(args.orthophoto_resolution, tree.opensfm_reconstruction,
-                                                    gsd_error_estimate=gsd_error_estimate,
+                                                    gsd_error_estimate=gsd_error_estimate, 
                                                     ignore_gsd=args.ignore_gsd,
                                                     ignore_resolution=ignore_resolution,
                                                     has_gcp=reconstruction.has_gcp()) / 100.0)
@@ -64,7 +64,7 @@ class ODMOrthoPhotoStage(types.ODM_Stage):
                 base_dir = tree.odm_texturing
             else:
                 base_dir = tree.odm_25dtexturing
-
+                
             if reconstruction.is_georeferenced():
                 model_file = tree.odm_georeferencing_model_obj_geo
             else:
@@ -84,9 +84,9 @@ class ODMOrthoPhotoStage(types.ODM_Stage):
             kwargs['models'] = ','.join(map(quote, models))
 
             # run odm_orthophoto
-            system.run('{bin}/odm_orthophoto -inputFiles "{models}" '
-                       '-logFile "{log}" -outputFile "{ortho}" -resolution {res} {verbose} '
-                       '-outputCornerFile "{corners}" {bands}'.format(**kwargs))
+            system.run('{bin}/odm_orthophoto -inputFiles {models} '
+                       '-logFile {log} -outputFile {ortho} -resolution {res} {verbose} '
+                       '-outputCornerFile {corners} {bands}'.format(**kwargs))
 
             # Create georeferenced GeoTiff
             geotiffcreated = False
@@ -128,7 +128,7 @@ class ODMOrthoPhotoStage(types.ODM_Stage):
                            '-a_srs \"{proj}\" '
                            '--config GDAL_CACHEMAX {max_memory}% '
                            '--config GDAL_TIFF_INTERNAL_MASK YES '
-                           '"{input}" "{output}" > "{log}"'.format(**kwargs))
+                           '{input} {output} > {log}'.format(**kwargs))
 
                 bounds_file_path = os.path.join(tree.odm_georeferencing, 'odm_georeferenced_model.bounds.gpkg')
                     
@@ -137,22 +137,22 @@ class ODMOrthoPhotoStage(types.ODM_Stage):
                 if args.orthophoto_cutline:
                     cutline_file = os.path.join(tree.odm_orthophoto, "cutline.gpkg")
 
-                    compute_cutline(tree.odm_orthophoto_tif,
+                    compute_cutline(tree.odm_orthophoto_tif, 
                                     bounds_file_path,
                                     cutline_file,
                                     args.max_concurrency,
                                     tmpdir=os.path.join(tree.odm_orthophoto, "grass_cutline_tmpdir"),
                                     scale=0.25)
 
-                    orthophoto.compute_mask_raster(tree.odm_orthophoto_tif, cutline_file,
+                    orthophoto.compute_mask_raster(tree.odm_orthophoto_tif, cutline_file, 
                                            os.path.join(tree.odm_orthophoto, "odm_orthophoto_cut.tif"),
                                            blend_distance=20, only_max_coords_feature=True)
 
-                orthophoto.post_orthophoto_steps(args, bounds_file_path, tree.odm_orthophoto_tif)
+                orthophoto.post_orthophoto_steps(args, bounds_file_path, tree.odm_orthophoto_tif, tree.orthophoto_tiles)
 
                 # Generate feathered orthophoto also
                 if args.orthophoto_cutline:
-                    orthophoto.feather_raster(tree.odm_orthophoto_tif,
+                    orthophoto.feather_raster(tree.odm_orthophoto_tif, 
                             os.path.join(tree.odm_orthophoto, "odm_orthophoto_feathered.tif"),
                             blend_distance=20
                         )
@@ -160,8 +160,7 @@ class ODMOrthoPhotoStage(types.ODM_Stage):
                 geotiffcreated = True
             if not geotiffcreated:
                 if io.file_exists(tree.odm_orthophoto_render):
-                    # 0.1 is arbitrary
-                    pseudogeo.add_pseudo_georeferencing(tree.odm_orthophoto_render, 0.1)
+                    pseudogeo.add_pseudo_georeferencing(tree.odm_orthophoto_render)
                     log.ODM_INFO("Renaming %s --> %s" % (tree.odm_orthophoto_render, tree.odm_orthophoto_tif))
                     os.rename(tree.odm_orthophoto_render, tree.odm_orthophoto_tif)
                 else:

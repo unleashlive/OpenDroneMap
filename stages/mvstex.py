@@ -80,7 +80,7 @@ class ODMMvsTexStage(types.ODM_Stage):
                 # mvstex definitions
                 kwargs = {
                     'bin': context.mvstex_path,
-                    'out_dir': io.join_paths(r['out_dir'], "odm_textured_model"),
+                    'out_dir': os.path.join(r['out_dir'], "odm_textured_model"),
                     'model': r['model'],
                     'dataTerm': self.params.get('data_term'),
                     'outlierRemovalType': self.params.get('outlier_rem_type'),
@@ -91,7 +91,6 @@ class ODMMvsTexStage(types.ODM_Stage):
                     'keepUnseenFaces': keepUnseenFaces,
                     'toneMapping': self.params.get('tone_mapping'),
                     'nadirMode': nadir,
-                    'nadirWeight': 2 ** args.texturing_nadir_weight - 1,
                     'nvm_file': r['nvm_file']
                 }
 
@@ -100,10 +99,10 @@ class ODMMvsTexStage(types.ODM_Stage):
                 # Make sure tmp directory is empty
                 if io.dir_exists(mvs_tmp_dir):
                     log.ODM_INFO("Removing old tmp directory {}".format(mvs_tmp_dir))
-                    shutil.rmtree(mvs_tmp_dir, ignore_errors=True)
+                    shutil.rmtree(mvs_tmp_dir)
 
                 # run texturing binary
-                system.run('{bin} "{nvm_file}" "{model}" "{out_dir}" '
+                system.run('{bin} {nvm_file} {model} {out_dir} '
                         '-d {dataTerm} -o {outlierRemovalType} '
                         '-t {toneMapping} '
                         '{skipGeometricVisibilityTest} '
@@ -111,8 +110,7 @@ class ODMMvsTexStage(types.ODM_Stage):
                         '{skipLocalSeamLeveling} '
                         '{skipHoleFilling} '
                         '{keepUnseenFaces} '
-                        '{nadirMode} '
-                        '-n {nadirWeight}'.format(**kwargs))
+                        '{nadirMode}'.format(**kwargs))
                 
                 if args.optimize_disk_space:
                     cleanup_files = [

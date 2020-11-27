@@ -6,18 +6,19 @@ from opendm import io
 from opendm import system
 from opendm import log
 
-from dataset import ODMLoadDatasetStage
-from run_opensfm import ODMOpenSfMStage
-from mve import ODMMveStage
-from odm_slam import ODMSlamStage
-from odm_meshing import ODMeshingStage
-from mvstex import ODMMvsTexStage
-from odm_georeferencing import ODMGeoreferencingStage
-from odm_orthophoto import ODMOrthoPhotoStage
-from odm_dem import ODMDEMStage
-from odm_filterpoints import ODMFilterPoints
-from splitmerge import ODMSplitStage, ODMMergeStage
+from stages.dataset import ODMLoadDatasetStage
+from stages.run_opensfm import ODMOpenSfMStage
+from stages.openmvs import ODMOpenMVSStage
+from stages.odm_slam import ODMSlamStage
+from stages.odm_meshing import ODMeshingStage
+from stages.mvstex import ODMMvsTexStage
+from stages.odm_georeferencing import ODMGeoreferencingStage
+from stages.odm_orthophoto import ODMOrthoPhotoStage
+from stages.odm_dem import ODMDEMStage
+from stages.odm_filterpoints import ODMFilterPoints
+from stages.splitmerge import ODMSplitStage, ODMMergeStage
 
+from stages.odm_report import ODMReport
 
 class ODMApp:
     def __init__(self, args):
@@ -33,7 +34,7 @@ class ODMApp:
         merge = ODMMergeStage('merge', args, progress=100.0)
         opensfm = ODMOpenSfMStage('opensfm', args, progress=25.0)
         slam = ODMSlamStage('slam', args)
-        mve = ODMMveStage('mve', args, progress=50.0)
+        openmvs = ODMOpenMVSStage('openmvs', args, progress=50.0)
         filterpoints = ODMFilterPoints('odm_filterpoints', args, progress=52.0)
         meshing = ODMeshingStage('odm_meshing', args, progress=60.0,
                                     max_vertex=args.mesh_size,
@@ -57,7 +58,8 @@ class ODMApp:
         dem = ODMDEMStage('odm_dem', args, progress=90.0,
                             max_concurrency=args.max_concurrency,
                             verbose=args.verbose)
-        orthophoto = ODMOrthoPhotoStage('odm_orthophoto', args, progress=100.0)
+        orthophoto = ODMOrthoPhotoStage('odm_orthophoto', args, progress=98.0)
+        report = ODMReport('odm_report', args, progress=100.0)
 
         # Normal pipeline
         self.first_stage = dataset
@@ -69,24 +71,16 @@ class ODMApp:
         if args.use_opensfm_dense or args.fast_orthophoto:
             opensfm.connect(filterpoints)
         else:
-            opensfm.connect(mve) \
-                    .connect(filterpoints)
+            opensfm.connect(openmvs) \
+                   .connect(filterpoints)
         
         filterpoints \
             .connect(meshing) \
             .connect(texturing) \
             .connect(georeferencing) \
             .connect(dem) \
-            .connect(orthophoto)
+            .connect(orthophoto) \
+            .connect(report)
                 
-        # # SLAM pipeline
-        # # TODO: this is broken and needs work
-        # log.ODM_WARNING("SLAM module is currently broken. We could use some help fixing this. If you know Python, get in touch at https://community.opendronemap.org.")
-        # self.first_stage = slam
-
-        # slam.connect(mve) \
-        #     .connect(meshing) \
-        #     .connect(texturing)
-
     def execute(self):
         self.first_stage.run()

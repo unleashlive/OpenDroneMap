@@ -10,6 +10,7 @@ from opendm import context
 from opendm import gsd
 from opendm import point_cloud
 from opendm import types
+from opendm.utils import get_depthmap_resolution
 from opendm.osfm import OSFMContext
 from opendm import multispectral
 
@@ -34,10 +35,12 @@ class ODMOpenSfMStage(types.ODM_Stage):
         self.update_progress(70)
 
         if args.optimize_disk_space:
-            shutil.rmtree(octx.path("features"))
-            shutil.rmtree(octx.path("matches"))
-            shutil.rmtree(octx.path("exif"))
-            shutil.rmtree(octx.path("reports"))
+            for folder in ["features", "matches", "exif", "reports"]:
+                folder_path = octx.path(folder)
+                if os.path.islink(folder_path):
+                    os.unlink(folder_path)
+                else:
+                    shutil.rmtree(folder_path)
 
         # If we find a special flag file for split/merge we stop right here
         if os.path.exists(octx.path("split_merge_stop_at_reconstruction.txt")):
@@ -58,7 +61,7 @@ class ODMOpenSfMStage(types.ODM_Stage):
         # since the undistorted images are used for MVS
         outputs['undist_image_max_size'] = max(
             gsd.image_max_size(photos, args.orthophoto_resolution, tree.opensfm_reconstruction, ignore_gsd=args.ignore_gsd, has_gcp=reconstruction.has_gcp()),
-            args.depthmap_resolution
+            get_depthmap_resolution(args, photos)
         )
 
         if not io.file_exists(updated_config_flag_file) or self.rerun():
@@ -126,12 +129,19 @@ class ODMOpenSfMStage(types.ODM_Stage):
             octx.run('export_geocoords --transformation --proj \'%s\'' % reconstruction.georef.proj4())
         else:
             log.ODM_WARNING("Will skip exporting %s" % tree.opensfm_transformation)
-
+        
         if args.optimize_disk_space:
             os.remove(octx.path("tracks.csv"))
-            os.remove(octx.path("undistorted", "tracks.csv"))
-            os.remove(octx.path("undistorted", "reconstruction.json"))
             if io.dir_exists(octx.path("undistorted", "depthmaps")):
                 files = glob.glob(octx.path("undistorted", "depthmaps", "*.npz"))
                 for f in files:
                     os.remove(f)
+
+            # Keep these if using OpenMVS
+            if args.fast_orthophoto or args.use_opensfm_dense:
+                files = [octx.path("undistorted", "tracks.csv"),
+                         octx.path("undistorted", "reconstruction.json")
+                        ]
+                for f in files:
+                    if os.path.exists(f):
+                        os.remove(f)

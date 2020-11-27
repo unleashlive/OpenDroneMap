@@ -15,9 +15,10 @@ from opensfm.large import metadataset
 from opendm.cropper import Cropper
 from opendm.concurrency import get_max_memory
 from opendm.remote import LocalRemoteExecutor
+from opendm.shots import merge_geojson_shots
 from opendm import point_cloud
 from pipes import quote
-
+from opendm.tiles.tiler import generate_dem_tiles
 
 class ODMSplitStage(types.ODM_Stage):
     def process(self, args, outputs):
@@ -63,7 +64,7 @@ class ODMSplitStage(types.ODM_Stage):
                 if not io.dir_exists(tree.submodels_path) or self.rerun():
                     if io.dir_exists(tree.submodels_path):
                         log.ODM_WARNING("Removing existing submodels directory: %s" % tree.submodels_path)
-                        shutil.rmtree(tree.submodels_path, ignore_errors=True)
+                        shutil.rmtree(tree.submodels_path)
 
                     octx.run("create_submodels")
                 else:
@@ -156,9 +157,9 @@ class ODMSplitStage(types.ODM_Stage):
 
                             #Create image lists
                             with open(path+"/opensfm/image_list.txt", "w") as o:
-                                o.writelines(map(lambda x: "../images/"+x+'\n', v["shots"].keys()))
+                                o.writelines(list(map(lambda x: "../images/"+x+'\n', v["shots"].keys())))
                             with open(path+"/img_list.txt", "w") as o:
-                                o.writelines(map(lambda x: x+'\n', v["shots"].keys()))
+                                o.writelines(list(map(lambda x: x+'\n', v["shots"].keys())))
 
                             i+=1
                     os.rename(octx.path("../submodels"), octx.path("../unaligned_submodels"))
@@ -215,7 +216,7 @@ class ODMSplitStage(types.ODM_Stage):
                         argv = get_submodel_argv(args, tree.submodels_path, sp_octx.name())
 
                         # Re-run the ODM toolchain on the submodel
-                        system.run(" ".join(map(quote, argv)), env_vars=os.environ.copy())
+                        system.run(" ".join(map(quote, map(str, argv))), env_vars=os.environ.copy())
                 else:
                     lre.set_projects([os.path.abspath(os.path.join(p, "..")) for p in submodel_paths])
                     lre.run_toolchain()
@@ -245,7 +246,7 @@ class ODMMergeStage(types.ODM_Stage):
             if args.merge in ['all', 'pointcloud']:
                 if not io.file_exists(tree.odm_georeferencing_model_laz) or self.rerun():
                     all_point_clouds = get_submodel_paths(tree.submodels_path, "odm_georeferencing", "odm_georeferenced_model.laz")
-
+                    
                     try:
                         point_cloud.merge(all_point_clouds, tree.odm_georeferencing_model_laz, rerun=self.rerun())
                         point_cloud.post_point_cloud_steps(args, tree)
@@ -253,8 +254,8 @@ class ODMMergeStage(types.ODM_Stage):
                         log.ODM_WARNING("Could not merge point cloud: %s (skipping)" % str(e))
                 else:
                     log.ODM_WARNING("Found merged point cloud in %s" % tree.odm_georeferencing_model_laz)
-
-
+                
+            
             self.update_progress(25)
 
             # Merge crop bounds
@@ -292,7 +293,7 @@ class ODMMergeStage(types.ODM_Stage):
 
                         orthophoto_vars = orthophoto.get_orthophoto_vars(args)
                         orthophoto.merge(all_orthos_and_ortho_cuts, tree.odm_orthophoto_tif, orthophoto_vars)
-                        orthophoto.post_orthophoto_steps(args, merged_bounds_file, tree.odm_orthophoto_tif)
+                        orthophoto.post_orthophoto_steps(args, merged_bounds_file, tree.odm_orthophoto_tif, tree.orthophoto_tiles)
                     elif len(all_orthos_and_ortho_cuts) == 1:
                         # Simply copy
                         log.ODM_WARNING("A single orthophoto/cutline pair was found between all submodels.")
@@ -330,8 +331,12 @@ class ODMMergeStage(types.ODM_Stage):
                         if args.crop > 0:
                             Cropper.crop(merged_bounds_file, dem_file, dem_vars, keep_original=not args.optimize_disk_space)
                         log.ODM_INFO("Created %s" % dem_file)
+                        
+                        if args.tiles:
+                            generate_dem_tiles(dem_file, tree.path("%s_tiles" % human_name.lower()), args.max_concurrency)
                     else:
                         log.ODM_WARNING("Cannot merge %s, %s was not created" % (human_name, dem_file))
+                
                 else:
                     log.ODM_WARNING("Found merged %s in %s" % (human_name, dem_filename))
 
@@ -340,6 +345,20 @@ class ODMMergeStage(types.ODM_Stage):
 
             if args.merge in ['all', 'dem'] and args.dtm:
                 merge_dems("dtm.tif", "DTM")
+
+            self.update_progress(95)
+
+            # Merge reports
+            if not io.dir_exists(tree.odm_report):
+                system.mkdir_p(tree.odm_report)
+
+            geojson_shots = tree.path(tree.odm_report, "shots.geojson")
+            if not io.file_exists(geojson_shots) or self.rerun():
+                geojson_shots_files = get_submodel_paths(tree.submodels_path, "odm_report", "shots.geojson")
+                log.ODM_INFO("Merging %s shots.geojson files" % len(geojson_shots_files))
+                merge_geojson_shots(geojson_shots_files, geojson_shots)
+            else:
+                log.ODM_WARNING("Found merged shots.geojson in %s" % tree.odm_report)
 
             # Stop the pipeline short! We're done.
             self.next_stage = None

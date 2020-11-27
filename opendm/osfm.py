@@ -9,17 +9,19 @@ from opendm import log
 from opendm import system
 from opendm import context
 from opendm import camera
+from opendm.utils import get_depthmap_resolution
+from opendm.photo import find_largest_photo_dim
 from opensfm.large import metadataset
 from opensfm.large import tools
-from opensfm.commands import undistort
+from opensfm.actions import undistort
+from opensfm.dataset import DataSet
 
 class OSFMContext:
     def __init__(self, opensfm_project_path):
         self.opensfm_project_path = opensfm_project_path
     
     def run(self, command):
-        # Use Python 2.x by default, otherwise OpenSfM uses Python 3.x
-        system.run('/usr/bin/env python2 %s/bin/opensfm %s "%s"' %
+        system.run('%s/bin/opensfm %s "%s"' %
                     (context.opensfm_path, command, self.opensfm_project_path))
 
     def is_reconstruction_done(self):
@@ -58,12 +60,12 @@ class OSFMContext:
         Setup a OpenSfM project
         """
         if rerun and io.dir_exists(self.opensfm_project_path):
-            shutil.rmtree(self.opensfm_project_path, ignore_errors=True)
+            shutil.rmtree(self.opensfm_project_path)
 
         if not io.dir_exists(self.opensfm_project_path):
             system.mkdir_p(self.opensfm_project_path)
 
-        list_path = io.join_paths(self.opensfm_project_path, 'image_list.txt')
+        list_path = os.path.join(self.opensfm_project_path, 'image_list.txt')
         if not io.file_exists(list_path) or rerun:
             
             # create file list
@@ -75,7 +77,7 @@ class OSFMContext:
                         has_alt = False
                     if photo.latitude is not None and photo.longitude is not None:
                         has_gps = True
-                    fout.write('%s\n' % io.join_paths(images_path, photo.filename))
+                    fout.write('%s\n' % os.path.join(images_path, photo.filename))
             
             # check for image_groups.txt (split-merge)
             image_groups_file = os.path.join(args.project_path, "image_groups.txt")
@@ -104,44 +106,82 @@ class OSFMContext:
                 use_bow = True
 
             # GPSDOP override if we have GPS accuracy information (such as RTK)
-            override_gps_dop = 'gps_accuracy_is_set' in args
-            for p in photos:
-                if p.get_gps_dop() is not None:
-                    override_gps_dop = True
-                    break
+            if 'gps_accuracy_is_set' in args:
+                log.ODM_INFO("Forcing GPS DOP to %s for all images" % args.gps_accuracy)
             
-            if override_gps_dop:
+            log.ODM_INFO("Writing exif overrides")
+
+            exif_overrides = {}
+            for p in photos:
                 if 'gps_accuracy_is_set' in args:
-                    log.ODM_INFO("Forcing GPS DOP to %s for all images" % args.gps_accuracy)
+                    dop = args.gps_accuracy
+                elif p.get_gps_dop() is not None:
+                    dop = p.get_gps_dop()
                 else:
-                    log.ODM_INFO("Looks like we have RTK accuracy info for some photos. Good! We'll use it.")
+                    dop = args.gps_accuracy # default value
 
-                exif_overrides = {}
-                for p in photos:
-                    dop = args.gps_accuracy if 'gps_accuracy_is_set' in args else p.get_gps_dop()
-                    if dop is not None and p.latitude is not None and p.longitude is not None:
-                        exif_overrides[p.filename] = {
-                            'gps': {
-                                'latitude': p.latitude,
-                                'longitude': p.longitude,
-                                'altitude': p.altitude if p.altitude is not None else 0,
-                                'dop': dop,
-                            }
+                if p.latitude is not None and p.longitude is not None:
+                    exif_overrides[p.filename] = {
+                        'gps': {
+                            'latitude': p.latitude,
+                            'longitude': p.longitude,
+                            'altitude': p.altitude if p.altitude is not None else 0,
+                            'dop': dop,
                         }
+                    }
 
-                with open(os.path.join(self.opensfm_project_path, "exif_overrides.json"), 'w') as f:
-                    f.write(json.dumps(exif_overrides))
+            with open(os.path.join(self.opensfm_project_path, "exif_overrides.json"), 'w') as f:
+                f.write(json.dumps(exif_overrides))
+
+            # Check image masks
+            masks = []
+            for p in photos:
+                if p.mask is not None:
+                    masks.append((p.filename, os.path.join(images_path, p.mask)))
+            
+            if masks:
+                log.ODM_INFO("Found %s image masks" % len(masks))
+                with open(os.path.join(self.opensfm_project_path, "mask_list.txt"), 'w') as f:
+                    for fname, mask in masks:
+                        f.write("{} {}\n".format(fname, mask))
+            
+            # Compute feature_process_size
+            feature_process_size = 2048 # default
+
+            if 'resize_to_is_set' in args:
+                # Legacy
+                log.ODM_WARNING("Legacy option --resize-to (this might be removed in a future version). Use --feature-quality instead.")
+                feature_process_size = int(args.resize_to)
+            else:
+                feature_quality_scale = {
+                    'ultra': 1,
+                    'high': 0.5,
+                    'medium': 0.25,
+                    'low': 0.125,
+                    'lowest': 0.0675,
+                }
+
+                max_dim = find_largest_photo_dim(photos)
+
+                if max_dim > 0:
+                    log.ODM_INFO("Maximum photo dimensions: %spx" % str(max_dim))
+                    feature_process_size = int(max_dim * feature_quality_scale[args.feature_quality])
+                else:
+                    log.ODM_WARNING("Cannot compute max image dimensions, going with defaults")
+
+            depthmap_resolution = get_depthmap_resolution(args, photos)
 
             # create config file for OpenSfM
             config = [
                 "use_exif_size: no",
-                "feature_process_size: %s" % args.resize_to,
+                "flann_algorithm: KDTREE", # more stable, faster than KMEANS
+                "feature_process_size: %s" % feature_process_size,
                 "feature_min_frames: %s" % args.min_num_features,
                 "processes: %s" % args.max_concurrency,
                 "matching_gps_neighbors: %s" % matcher_neighbors,
                 "matching_gps_distance: %s" % args.matcher_distance,
                 "depthmap_method: %s" % args.opensfm_depthmap_method,
-                "depthmap_resolution: %s" % args.depthmap_resolution,
+                "depthmap_resolution: %s" % depthmap_resolution,
                 "depthmap_min_patch_sd: %s" % args.opensfm_depthmap_min_patch_sd,
                 "depthmap_min_consistent_views: %s" % args.opensfm_depthmap_min_consistent_views,
                 "optimize_camera_parameters: %s" % ('no' if args.use_fixed_camera_params or args.cameras else 'yes'),
@@ -206,7 +246,7 @@ class OSFMContext:
             log.ODM_WARNING("%s already exists, not rerunning OpenSfM setup" % list_path)
 
     def get_config_file_path(self):
-        return io.join_paths(self.opensfm_project_path, 'config.yaml')
+        return os.path.join(self.opensfm_project_path, 'config.yaml')
 
     def reconstructed(self):
         if not io.file_exists(self.path("reconstruction.json")):
@@ -278,10 +318,8 @@ class OSFMContext:
         undistorted_images_path = self.path("undistorted", "images")
 
         if not io.dir_exists(undistorted_images_path) or rerun:
-            cmd = undistort.Command(imageFilter)
-            parser = argparse.ArgumentParser()
-            cmd.add_arguments(parser)
-            cmd.run(parser.parse_args([self.opensfm_project_path]))
+            undistort.run_dataset(DataSet(self.opensfm_project_path), "reconstruction.json", 
+                                  0, None, "undistorted", imageFilter)
         else:
             log.ODM_WARNING("Found an undistorted directory in %s" % undistorted_images_path)
 
@@ -316,7 +354,7 @@ def get_submodel_argv(args, submodels_path = None, submodel_name = None):
     :return the same as argv, but removing references to --split, 
         setting/replacing --project-path and name
         removing --rerun-from, --rerun, --rerun-all, --sm-cluster
-        removing --pc-las, --pc-csv, --pc-ept flags (processing these is wasteful)
+        removing --pc-las, --pc-csv, --pc-ept, --tiles flags (processing these is wasteful)
         adding --orthophoto-cutline
         adding --dem-euclidean-map
         adding --skip-3dmodel (split-merge does not support 3D model merging)
@@ -325,7 +363,7 @@ def get_submodel_argv(args, submodels_path = None, submodel_name = None):
         reading the contents of --cameras
     """
     assure_always = ['orthophoto_cutline', 'dem_euclidean_map', 'skip_3dmodel']
-    remove_always = ['split', 'split_overlap', 'rerun_from', 'rerun', 'gcp', 'end_with', 'sm_cluster', 'rerun_all', 'pc_csv', 'pc_las', 'pc_ept']
+    remove_always = ['split', 'split_overlap', 'rerun_from', 'rerun', 'gcp', 'end_with', 'sm_cluster', 'rerun_all', 'pc_csv', 'pc_las', 'pc_ept', 'tiles']
     read_json_always = ['cameras']
 
     argv = sys.argv

@@ -1,16 +1,25 @@
-#!/usr/bin/python
+#!/usr/bin/python3
+
+# Basic check
+import sys
+if sys.version_info.major < 3:
+    print("Ups! ODM needs to run with Python 3. It seems you launched it with Python 2. Try using: python3 run.py ... ")
+    sys.exit(1)
 
 from opendm import log
 from opendm import config
 from opendm import system
 from opendm import io
 from opendm.progress import progressbc
+
+import os
+from pipes import quote
+
+from stages.odm_app import ODMApp
+
 # import zip_results
 import ua_postprocessing
 import awscli_util
-import os
-from pipes import quote
-from stages.odm_app import ODMApp
 
 if __name__ == '__main__':
     args = config.config()
@@ -35,12 +44,10 @@ if __name__ == '__main__':
     progressbc.set_project_name(args.name)
 
     # Add project dir if doesn't exist
-    args.project_path = io.join_paths(args.project_path, args.name)
+    args.project_path = os.path.join(args.project_path, args.name)
     if not io.dir_exists(args.project_path):
         log.ODM_WARNING('Directory %s does not exist. Creating it now.' % args.name)
         system.mkdir_p(os.path.abspath(args.project_path))
-
-    # s3_sync.aws_cli('s3', 'sync', 's3://pylot/ap-southeast-2:50fdfd90-6d7a-4c26-8230-66f82ff9df9a/GDRIVE-IMPORT/session-1576423143387/modelling-1578586907227/code/images/', '/project/unleash_model/images')
     src_s3_key = args.input_s3key
     images_local_path = os.path.join(args.project_path, 'images')
     if not src_s3_key.endswith('/'):
@@ -60,11 +67,13 @@ if __name__ == '__main__':
                         quote(os.path.join(args.project_path, "odm_georeferencing_25d")),
                         quote(os.path.join(args.project_path, "odm_meshing")),
                         quote(os.path.join(args.project_path, "odm_orthophoto")),
+                        quote(os.path.join(args.project_path, "odm_dem")),
+                        quote(os.path.join(args.project_path, "odm_report")),
                         quote(os.path.join(args.project_path, "odm_texturing")),
                         quote(os.path.join(args.project_path, "opensfm")),
                         quote(os.path.join(args.project_path, "odm_filterpoints")),
                         quote(os.path.join(args.project_path, "odm_texturing_25d")),
-                        quote(os.path.join(args.project_path, "mve")),
+                        quote(os.path.join(args.project_path, "openmvs")),
                         quote(os.path.join(args.project_path, "entwine_pointcloud")),
                         quote(os.path.join(args.project_path, "submodels")),
                     ]))
@@ -144,4 +153,4 @@ if __name__ == '__main__':
         log.ODM_INFO('MMMMMMMMMMMN-  smNm/  +MMm  :NNdo` .mMM` oMM+/yMM/  MMMMMMMMMMMM')
         log.ODM_INFO('MMMMMMMMMMMMNo-    `:yMMMm      `:sNMMM` sMMMMMMM+  NMMMMMMMMMMM')
         log.ODM_INFO('MMMMMMMMMMMMMMMNmmNMMMMMMMNmmmmNMMMMMMMNNMMMMMMMMMNNMMMMMMMMMMMM')
-    log.ODM_INFO('OpenDroneMap app finished - %s' % system.now())
+    log.ODM_INFO('ODM app finished - %s' % system.now())

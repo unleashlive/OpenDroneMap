@@ -85,7 +85,7 @@ class ODMGeoreferencingStage(types.ODM_Stage):
                 }
 
                 if transformPointCloud:
-                    kwargs['pc_params'] = '-inputPointCloudFile "{input_pc_file}" -outputPointCloudFile "{output_pc_file}"'.format(**kwargs)
+                    kwargs['pc_params'] = '-inputPointCloudFile {input_pc_file} -outputPointCloudFile {output_pc_file}'.format(**kwargs)
 
                     if reconstruction.is_georeferenced():
                         kwargs['pc_params'] += ' -outputPointCloudSrs %s' % pipes.quote(reconstruction.georef.proj4())
@@ -96,16 +96,16 @@ class ODMGeoreferencingStage(types.ODM_Stage):
  
                 if io.file_exists(tree.opensfm_transformation) and io.file_exists(tree.odm_georeferencing_coords):
                     log.ODM_INFO('Running georeferencing with OpenSfM transformation matrix')
-                    system.run('{bin}/odm_georef -bundleFile "{bundle}" -inputTransformFile "{input_trans_file}" -inputCoordFile "{coords}" '
-                               '-inputFile "{model}" -outputFile "{model_geo}" '
+                    system.run('{bin}/odm_georef -bundleFile {bundle} -inputTransformFile {input_trans_file} -inputCoordFile {coords} '
+                               '-inputFile {model} -outputFile {model_geo} '
                                '{pc_params} {verbose} '
-                               '-logFile "{log}" -outputTransformFile "{transform_file}" -georefFileOutputPath "{geo_sys}"'.format(**kwargs))
+                               '-logFile {log} -outputTransformFile {transform_file} -georefFileOutputPath {geo_sys}'.format(**kwargs))
                 elif io.file_exists(tree.odm_georeferencing_coords):
                     log.ODM_INFO('Running georeferencing with generated coords file.')
-                    system.run('{bin}/odm_georef -bundleFile "{bundle}" -inputCoordFile "{coords}" '
-                               '-inputFile "{model}" -outputFile "{model_geo}" '
+                    system.run('{bin}/odm_georef -bundleFile {bundle} -inputCoordFile {coords} '
+                               '-inputFile {model} -outputFile {model_geo} '
                                '{pc_params} {verbose} '
-                               '-logFile "{log}" -outputTransformFile "{transform_file}" -georefFileOutputPath "{geo_sys}"'.format(**kwargs))
+                               '-logFile {log} -outputTransformFile {transform_file} -georefFileOutputPath {geo_sys}'.format(**kwargs))
                 else:
                     log.ODM_WARNING('Georeferencing failed. Make sure your '
                                     'photos have geotags in the EXIF or you have '
@@ -120,15 +120,24 @@ class ODMGeoreferencingStage(types.ODM_Stage):
                         log.ODM_INFO("Calculating cropping area and generating bounds shapefile from point cloud")
                         cropper = Cropper(tree.odm_georeferencing, 'odm_georeferenced_model')
                         
-                        decimation_step = 40 if args.fast_orthophoto or args.use_opensfm_dense else 90
+                        if args.fast_orthophoto:
+                            decimation_step = 10
+                        elif args.use_opensfm_dense:
+                            decimation_step = 40
+                        else:
+                            decimation_step = 90
                         
                         # More aggressive decimation for large datasets
                         if not args.fast_orthophoto:
                             decimation_step *= int(len(reconstruction.photos) / 1000) + 1
 
-                        cropper.create_bounds_gpkg(tree.odm_georeferencing_model_laz, args.crop, 
-                                                    decimation_step=decimation_step)
-
+                        try:
+                            cropper.create_bounds_gpkg(tree.odm_georeferencing_model_laz, args.crop, 
+                                                        decimation_step=decimation_step)
+                        except:
+                            log.ODM_WARNING("Cannot calculate crop bounds! We will skip cropping")
+                            args.crop = 0
+                            
                     # Do not execute a second time, since
                     # We might be doing georeferencing for
                     # multiple models (3D, 2.5D, ...)
