@@ -72,6 +72,7 @@ RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
 RUN add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable \
   && apt-get update -y \
   && apt-get install --no-install-recommends -y \
+  curl \
   nodejs \
   imagemagick \
   gdal-bin \
