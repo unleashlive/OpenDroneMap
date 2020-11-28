@@ -66,7 +66,7 @@ RUN bash configure.sh installruntimedepsonly \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-s
+
 RUN add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable \
   && apt-get update -y \
   && apt-get install --no-install-recommends -y \
