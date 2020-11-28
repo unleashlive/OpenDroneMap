@@ -66,9 +66,7 @@ RUN bash configure.sh installruntimedepsonly \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-
-#prepare node installation
-RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
+s
 RUN add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable \
   && apt-get update -y \
   && apt-get install --no-install-recommends -y \
@@ -78,6 +76,9 @@ RUN add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable \
   gdal-bin \
   git \
   libgdal-dev
+
+#prepare node installation
+RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
 
 #install obj2gltf
 RUN npm -g install github:AnalyticalGraphicsInc/obj2gltf.git
