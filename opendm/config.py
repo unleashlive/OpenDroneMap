@@ -86,6 +86,14 @@ def config(argv=None, parser=None):
                         nargs='?',
                         help='Name of Project (i.e subdirectory of projects folder)')
 
+    parser.add_argument('--input-s3key',
+                        metavar='<images srcs3key>',
+                        help='Path to source images on S3 that will be imported')
+
+    parser.add_argument('--output-s3key',
+                        metavar='<images dsts3key>',
+                        help='Path to destination on S3 to export results to')
+
     parser.add_argument('--resize-to',
                         metavar='<integer>',
                         action=StoreValue,
