@@ -10,6 +10,18 @@ WORKDIR /code
 
 # Copy everything
 COPY . ./
+RUN apt-get update -y && apt-get install -y software-properties-common
+RUN add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable \
+  && apt-get install --no-install-recommends -y \
+  curl \
+  nodejs \
+  imagemagick \
+  gdal-bin \
+  git \
+  libgdal-dev
+RUN apt-get install  -y npm
+#install obj2gltf
+RUN npm -g install github:AnalyticalGraphicsInc/obj2gltf.git
 
 # Run the build
 RUN bash configure.sh install
@@ -65,23 +77,7 @@ COPY --from=builder /usr/local /usr/local
 RUN bash configure.sh installruntimedepsonly \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-
-RUN add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable \
-  && apt-get update -y \
-  && apt-get install --no-install-recommends -y \
-  curl \
-  nodejs \
-  imagemagick \
-  gdal-bin \
-  git \
-  libgdal-dev
-
-#prepare node installation
-RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
-
-#install obj2gltf
-RUN npm -g install github:AnalyticalGraphicsInc/obj2gltf.git
+RUN pip install awscli
 
 COPY ua_postprocessing.py /code/ua_postprocessing.py
 COPY awscli_util.py /code/awscli_util.py
