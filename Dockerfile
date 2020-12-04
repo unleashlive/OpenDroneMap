@@ -10,18 +10,6 @@ WORKDIR /code
 
 # Copy everything
 COPY . ./
-RUN apt-get update -y && apt-get install -y software-properties-common
-RUN add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable \
-  && apt-get install --no-install-recommends -y \
-  curl \
-  nodejs \
-  imagemagick \
-  gdal-bin \
-  git \
-  libgdal-dev
-RUN apt-get install  -y npm
-#install obj2gltf
-RUN npm -g install github:AnalyticalGraphicsInc/obj2gltf.git
 
 # Run the build
 RUN bash configure.sh install
@@ -71,6 +59,19 @@ COPY --from=builder /code /code
 
 # Copy the Python libraries installed via pip from the builder
 COPY --from=builder /usr/local /usr/local
+
+RUN apt-get update -y && apt-get install -y software-properties-common
+RUN add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable \
+  && apt-get install --no-install-recommends -y \
+  curl \
+  nodejs \
+  imagemagick \
+  gdal-bin \
+  git \
+  libgdal-dev
+RUN apt-get install  -y npm
+#install obj2gltf
+RUN npm -g install github:AnalyticalGraphicsInc/obj2gltf.git
 
 # Install shared libraries that we depend on via APT, but *not*
 # the -dev packages to save space!
