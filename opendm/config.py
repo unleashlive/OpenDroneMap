@@ -165,6 +165,15 @@ def config(argv=None, parser=None):
                             'Can be one of: %(choices)s. Default: '
                             '%(default)s'))
 
+    parser.add_argument('--matcher-type',
+                        metavar='<string>',
+                        action=StoreValue,
+                        default='flann',
+                        choices=['flann', 'bow'],
+                        help=('Matcher algorithm, Fast Library for Approximate Nearest Neighbors or Bag of Words. FLANN is slower, but more stable. BOW is faster, but can sometimes miss valid matches. '
+                            'Can be one of: %(choices)s. Default: '
+                            '%(default)s'))
+
     parser.add_argument('--matcher-neighbors',
                         metavar='<integer>',
                         action=StoreValue,
@@ -472,13 +481,6 @@ def config(argv=None, parser=None):
                               '[none, gauss_damping, gauss_clamping]. Default: '
                               '%(default)s'))
 
-    parser.add_argument('--texturing-skip-visibility-test',
-                        action=StoreTrue,
-                        nargs=0,
-                        default=False,
-                        help=('Skip geometric visibility test. Default: '
-                              ' %(default)s'))
-
     parser.add_argument('--texturing-skip-global-seam-leveling',
                         action=StoreTrue,
                         nargs=0,
@@ -491,20 +493,6 @@ def config(argv=None, parser=None):
                         nargs=0,
                         default=False,
                         help='Skip local seam blending. Default:  %(default)s')
-
-    parser.add_argument('--texturing-skip-hole-filling',
-                        action=StoreTrue,
-                        nargs=0,
-                        default=False,
-                        help=('Skip filling of holes in the mesh. Default: '
-                              ' %(default)s'))
-
-    parser.add_argument('--texturing-keep-unseen-faces',
-                        action=StoreTrue,
-                        nargs=0,
-                        default=False,
-                        help=('Keep faces in the mesh that are not seen in any camera. '
-                              'Default:  %(default)s'))
 
     parser.add_argument('--texturing-tone-mapping',
                         metavar='<string>',
@@ -762,6 +750,15 @@ def config(argv=None, parser=None):
                     help=('Perform ground rectification on the point cloud. This means that wrongly classified ground '
                           'points will be re-classified and gaps will be filled. Useful for generating DTMs. '
                           'Default: %(default)s'))
+
+    parser.add_argument('--primary-band',
+                        metavar='<string>',
+                        action=StoreValue,
+                        default="auto",
+                        type=str,
+                        help=('When processing multispectral datasets, you can specify the name of the primary band that will be used for reconstruction. '
+                              'It\'s recommended to choose a band which has sharp details and is in focus. ' 
+                              'Default: %(default)s'))
 
     args = parser.parse_args(argv)
 
